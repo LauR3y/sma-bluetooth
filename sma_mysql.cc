@@ -1,8 +1,8 @@
-#include <mysql/mysql.h>
+#include <mariadb/mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sma_struct.h"
+#include "sma_struct.hh"
 #include <time.h>
 
 
@@ -80,7 +80,9 @@ int install_mysql_tables( ConfType * conf, FlagType * flag, char *SCHEMA )
     MYSQL_ROW 	row;
     char 	SQLQUERY[1000];
 
-    OpenMySqlDatabase( conf->MySqlHost, conf->MySqlUser, conf->MySqlPwd, "mysql");
+    char mysql_char[] = "mysql";
+
+    OpenMySqlDatabase( conf->MySqlHost, conf->MySqlUser, conf->MySqlPwd, mysql_char);
     //Get Start of day value
     sprintf(SQLQUERY,"SHOW DATABASES" );
     if (flag->debug == 1) printf("%s\n",SQLQUERY);
@@ -142,7 +144,7 @@ int install_mysql_tables( ConfType * conf, FlagType * flag, char *SCHEMA )
            `Units` varchar(20) DEFAULT NULL, \
            `CHANGETIME` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP, \
            PRIMARY KEY (`id`), \
-           UNIQUE KEY 'DateTime'(`DateTime`,`Inverter`,`Serial`,`Description`) \
+           UNIQUE KEY `DateTime`(`DateTime`,`Inverter`,`Serial`,`Description`) \
            ) ENGINE=MyISAM" );
        if (flag->debug == 1) printf("%s\n",SQLQUERY);
        DoQuery(SQLQUERY);
@@ -174,7 +176,9 @@ void update_mysql_tables( ConfType * conf, FlagType * flag )
     MYSQL_ROW 	row;
     char 	SQLQUERY[1000];
 
-    OpenMySqlDatabase( conf->MySqlHost, conf->MySqlUser, conf->MySqlPwd, "mysql");
+    char mysql_char[] = "mysql";
+
+    OpenMySqlDatabase( conf->MySqlHost, conf->MySqlUser, conf->MySqlPwd, mysql_char);
     sprintf( SQLQUERY,"USE  %s", conf->MySqlDatabase );
     if (flag->debug == 1) printf("%s\n",SQLQUERY);
     DoQuery(SQLQUERY);

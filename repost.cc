@@ -28,14 +28,12 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <curl/curl.h>
-#include "sma_struct.h"
-#include "sma_mysql.h"
+#include "sma_struct.hh"
+#include "sma_mysql.hh"
 
-size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) 
+size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) 
 {
-    size_t written;
-
-    written = fwrite(ptr, size, nmemb, stream);
+    size_t const written = fwrite(ptr, size, nmemb, stream);
     return written;
 }
 
@@ -47,16 +45,15 @@ int sma_repost( ConfType * conf, FlagType * flag )
     char buf[1024], buf1[400];
     char 	SQLQUERY[1000];
     char compurl[400];
-    int	 ret, update_data;
+    int	 ret = -1, update_data;
     MYSQL_ROW row;
 
-    float dtotal, starttotal;
+    float dtotal;
     float power;
     
     /* Connect to database */
     OpenMySqlDatabase( conf->MySqlHost, conf->MySqlUser, conf->MySqlPwd, conf->MySqlDatabase );
     //Get Start of day value
-    starttotal = 0;
     printf("SELECT DATE_FORMAT( dt1.DateTime, \"%%Y%%m%%d\" ), round((dt1.ETotalToday*1000-dt2.ETotalToday*1000),0) FROM DayData as dt1 join DayData as dt2 on dt2.DateTime = DATE_SUB( dt1.DateTime, interval 1 day ) WHERE dt1.DateTime LIKE \"%%-%%-%% 23:55:00\" ' ORDER BY dt1.DateTime DESC" );
     sprintf(SQLQUERY,"SELECT DATE_FORMAT( dt1.DateTime, \"%%Y%%m%%d\" ), round((dt1.ETotalToday*1000-dt2.ETotalToday*1000),0) FROM DayData as dt1 join DayData as dt2 on dt2.DateTime = DATE_SUB( dt1.DateTime, interval 1 day ) WHERE dt1.DateTime LIKE \"%%-%%-%% 23:55:00\" ORDER BY dt1.DateTime DESC" );
     if (flag->debug == 1) printf("%s\n",SQLQUERY);
@@ -79,7 +76,7 @@ int sma_repost( ConfType * conf, FlagType * flag )
              if (flag->debug == 1) printf("result = %d\n",result);
              rewind( fp );
              fgets( buf, sizeof( buf ), fp );
-             result = sscanf( buf, "Bad request %s has no outputs between the requested period", buf1 );
+             result = (CURLcode)sscanf( buf, "Bad request %s has no outputs between the requested period", buf1 );
              printf( "return=%d buf1=%s\n", result, buf1 );
              if( result > 0 )
              {
@@ -89,7 +86,7 @@ int sma_repost( ConfType * conf, FlagType * flag )
              else
              {
                  printf( "buf=%s here 1.\n", buf );
-                 result = sscanf( buf, "Forbidden 403: Exceeded 60 requests %s", buf1 );
+                 result = (CURLcode) sscanf( buf, "Forbidden 403: Exceeded 60 requests %s", buf1 );
 		 if( result > 0 ) {
 		    printf( "Too Many requests in 1hr sleeping for 1hr\n");
                     fclose(fp);
@@ -133,4 +130,5 @@ int sma_repost( ConfType * conf, FlagType * flag )
         fclose(fp);
     }
     mysql_close(conn);
+    return ret;
 }

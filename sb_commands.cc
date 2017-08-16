@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sma_struct.h"
+#include "sma_struct.hh"
 #include <sys/socket.h>
 #include <time.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
 #include <errno.h>
-#include "sma_mysql.h"
-
+#include "sma_mysql.hh"
+#include <unistd.h>
 
 
 extern unsigned char * ReadStream( ConfType *, FlagType *, ReadRecordType *, int *, unsigned char *, int *, unsigned char *, int *, unsigned char *, int , int *, int * );
@@ -17,7 +17,17 @@ extern long ConvertStreamtoLong( unsigned char *, int, unsigned long * );
 extern float ConvertStreamtoFloat( unsigned char *, int, float * );
 extern char * ConvertStreamtoString( unsigned char *, int );
 extern unsigned char conv( char * );
-
+char * debugdate();
+int select_str(char *s);
+int read_bluetooth( ConfType * conf, FlagType * flag, ReadRecordType * readRecord, int *s, int *rr, unsigned char *received, int cc, unsigned char *last_sent, int *terminated );
+int empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRecord, int *s, int *rr, unsigned char *received, int cc, unsigned char *last_sent, int *terminated );
+void
+tryfcs16(FlagType * flag, unsigned char *cp, int len, unsigned char *fl, int * cc);
+void add_escapes(unsigned char *cp, int *len);
+void fix_length_send( FlagType * flag, unsigned char *cp, int *len);
+time_t ConvertStreamtoTime( unsigned char * stream, int length, time_t * value, int *day, int *month, int *year, int *hour, int *minute, int *second );
+int ConvertStreamtoInt( unsigned char * stream, int length, int * value );
+int GetLine( const char * command, FILE * fp );
 
 int ConnectSocket ( ConfType * conf )
 {
@@ -57,7 +67,7 @@ int ConnectSocket ( ConfType * conf )
 /*
  * Update internal running list with live data for later processing
  */
-int UpdateLiveList( ConfType * conf, FlagType * flag,  UnitType *unit, char * format, time_t idate,  char * description, float fvalue, int ivalue, char * svalue, char * units, int persistent, int * livedatalen, LiveDataType ** livedatalist )
+int UpdateLiveList( ConfType * conf, FlagType * flag,  UnitType *unit, char const * const format, time_t idate,  char * description, float fvalue, int ivalue, char * svalue, char * units, int persistent, int * livedatalen, LiveDataType ** livedatalist )
 {
     unsigned long long 	inverter_serial;
 
@@ -106,7 +116,6 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
    int	 error=0;
    int   togo=0;
    int   finished;
-   time_t curtime;
    time_t reporttime;
    time_t fromtime;
    time_t totime;
@@ -115,7 +124,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
    unsigned char tzhex[2] = { 0 };
    unsigned char timeset[4] = { 0x30,0xfe,0x7e,0x00 };
    struct tm tm;
-   int day,month,year,hour,minute,second,datapoint;
+   int day,month,year,hour,minute,second;
    unsigned char fl[1024] = { 0 };
    unsigned char received[1024];
    unsigned char datarecord[1024];
@@ -124,7 +133,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
    ReadRecordType readRecord;
    char  *lineread;
    unsigned char * last_sent;
-   unsigned char * data;
+   unsigned char * data = 0;
    char	BTAddressBuf[20];
    char tt[10] = {48,48,48,48,48,48,48,48,48,48}; 
    char ti[3];	
@@ -135,14 +144,12 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
    float ptotal;
    float strength;
    int   found, already_read, terminated;
-   int   gap, return_key, datalength=0;
-   int   crc_at_end;
-   int	 pass_i, send_count;
+   int   gap = 0, return_key, datalength=0;
+   int   crc_at_end = 0;
+   int	 pass_i, send_count = 0;
    int	 persistent;
    int index;
    unsigned long long inverter_serial;
-   MYSQL_ROW row, row1;
-   char SQLQUERY[200];
    char	valuebuf[30];
 
 
@@ -218,7 +225,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
 	do {
             if( already_read == 0 )
                 rr=0;
-            if(( already_read == 0 )&&( read_bluetooth( conf, flag, &readRecord, s, &rr, &received, cc, last_sent, &terminated ) != 0 ))
+            if(( already_read == 0 )&&( read_bluetooth( conf, flag, &readRecord, s, &rr, received, cc, last_sent, &terminated ) != 0 ))
             {
                 already_read=0;
                 found=0;
@@ -255,7 +262,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
     }
     if(!strcmp(lineread,"S")){		//See if line is something we need to send
         //Empty the receive data ready for new command
-        while( ((*linenum)>22)&&( empty_read_bluetooth( conf, flag, &readRecord, s, &rr, &received, cc, last_sent, &terminated ) >= 0 ));
+        while( ((*linenum)>22)&&( empty_read_bluetooth( conf, flag, &readRecord, s, &rr, received, cc, last_sent, &terminated ) >= 0 ));
 	if (flag->debug	== 1) printf("[%d] %s Sending\n", (*linenum),debugdate());
 	cc = 0;
 	do{
@@ -447,6 +454,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                     }
                 }
                 else
+		  {
                     totime=0;
 		    sprintf(tt,"%03x",(int)totime); //convert to a hex in a string
 		    for (i=7;i>0;i=i-2){ //change order and convert to integer
@@ -456,6 +464,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
 		        fl[cc] = conv(ti);
 			cc++;		
 		    }
+		  }
 	       	    break;
 				
 	    case 19: // $PASSWORD
@@ -588,7 +597,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                     if( i > j ) break;
                     printf("%02x ",fl[i]);
                 }
-                printf("                      SUSYId:            %02x", fl[j], fl[j+1] );
+                printf("                      SUSYId:            %02x %02x", fl[j], fl[j+1] );
                 j++;
                 printf("\n   " );
                 for( i=++j; i<cc; i++ ) {
@@ -643,7 +652,7 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
         if( readRecord.Status[0]==0xe0 ) {
 	    if (flag->debug	== 1) printf("\nThere is no data currently available %s\n", debugdate());
                 // Read the rest of the records
-                while( read_bluetooth( conf, flag, &readRecord, s, &rr, &received, cc, last_sent, &terminated ) == 0 );
+                while( read_bluetooth( conf, flag, &readRecord, s, &rr, received, cc, last_sent, &terminated ) == 0 );
 
             }
             else
@@ -673,22 +682,26 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                                 gap = 28;
                             if( (data+3)[0] == 0x00 )
                                 gap = 28;
+			    // ????
+			    if( gap==0 ) {
+			      abort();
+			    }
                             for ( i = 0; i<datalen; i+=gap ) 
                             {
                                 idate=ConvertStreamtoTime( data+i+4, 4, &idate, &day, &month, &year, &hour, &minute, &second );
                                 ConvertStreamtoFloat( data+i+8, 3, &currentpower_total );
                                 return_key=-1;
-                                for( j=0; j<conf->num_return_keys; j++ )
+                                for(unsigned int uj=0; uj<conf->num_return_keys; uj++ )
                                 {
-                                    if(( (data+i+1)[0] == conf->returnkeylist[j].key1 )&&((data+i+2)[0] == conf->returnkeylist[j].key2)) {
-                                        return_key=j;
+                                    if(( (data+i+1)[0] == conf->returnkeylist[uj].key1 )&&((data+i+2)[0] == conf->returnkeylist[uj].key2)) {
+                                        return_key=uj;
                                         break;
                                     }
                                 }
                                 if( return_key >= 0 )
 				{
 				    printf("%d-%02d-%02d %02d:%02d:%02d %-20s = %.0f %-20s\n", year, month, day, hour, minute, second, conf->returnkeylist[return_key].description, currentpower_total/conf->returnkeylist[return_key].divisor, conf->returnkeylist[return_key].units );
-				    inverter_serial=unit[0]->Serial[3]<<24+unit[0]->Serial[2]<<16+unit[0]->Serial[1]<<8+unit[0]->Serial[0];
+				    inverter_serial = (unit[0]->Serial[3]<<24) + (unit[0]->Serial[2]<<16) + (unit[0]->Serial[1]<<8) + (unit[0]->Serial[0]);
                                 }
                                 else
                                     if( (data+0)[0] > 0 )
@@ -774,79 +787,84 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                             break;
 				
 		    case 18: // $ARCHIVEDATA1
-                        finished=0;
-                        ptotal=0;
-                        idate=0;
-                        printf( "\n" );
-                        while( finished != 1 ) {
-                            if(( data = ReadStream( conf, flag,  &readRecord, s, received, &rr, data, &datalen, last_sent, cc, &terminated, &togo )) != NULL )
-                            {
-                                j=0;
-                                for( i=0; i<datalen; i++ )
-                                {
-                                    datarecord[j]=data[i];
-                                    j++;
-                                    if( j > 11 ) {
-                                        if( idate > 0 ) prev_idate=idate;
-                                        else prev_idate=0;
-                                        idate=ConvertStreamtoTime( datarecord, 4, &idate, &day, &month, &year, &hour, &minute, &second  );
-                                        if( prev_idate == 0 )
-                                            prev_idate = idate-300;
+		      finished=0;
+		      ptotal=0;
+		      idate=0;
+		      printf( "\n" );
 
-                                        ConvertStreamtoFloat( datarecord+4, 8, &gtotal );
-                                        if((*archdatalen) == 0 )
-                                            ptotal = gtotal;
-	                                    printf("\n%d/%d/%4d %02d:%02d:%02d  total=%.3f Kwh current=%.0f Watts togo=%d i=%d crc=%d", day, month, year, hour, minute,second, gtotal/1000, (gtotal-ptotal)*12, togo, i, crc_at_end);
-					    if( idate != prev_idate+300 ) {
-                                                printf( "Date Error! prev=%d current=%d\n", (int)prev_idate, (int)idate );
-                                                error=1;
-					        break;
-                                            }
-                                            if( (*archdatalen) == 0 )
-                                                (*archdatalist) = ( ArchDataType *)malloc( sizeof( ArchDataType ) );
-                                            else
-                                                (*archdatalist) = ( ArchDataType *)realloc( (*archdatalist), sizeof( ArchDataType )*((*archdatalen)+1));
-					    ((*archdatalist)+(*archdatalen))->date=idate;
-                                            strcpy(((*archdatalist)+(*archdatalen))->inverter,unit[0]->Inverter);
-				            inverter_serial=(unit[0]->Serial[0]<<24)+(unit[0]->Serial[1]<<16)+(unit[0]->Serial[2]<<8)+unit[0]->Serial[3];
-				            ((*archdatalist)+(*archdatalen))->serial=inverter_serial;
-                                            ((*archdatalist)+(*archdatalen))->accum_value=gtotal/1000;
-                                            ((*archdatalist)+(*archdatalen))->current_value=(gtotal-ptotal)*12;
-                                            (*archdatalen)++;
-                                            ptotal=gtotal;
-                                            j=0; //get ready for another record
-                                        }
-                                    }
-                                    if( togo == 0 ) 
-                                        finished=1;
-                                    else
-                                        if( read_bluetooth( conf, flag, &readRecord, s, &rr, received, cc, last_sent, &terminated ) != 0 )
-                                        {
-                                            found=0;
-                                            /*
-                                            if( (*archdatalen) > 0 )
-                                                free( archdatalist );
-                                            (*archdatalen)=0;
-                                            if( (*livedatalen) > 0 )
-                                                free( livedatalist );
-                                            (*livedatalen)=0;
-                                            */
-                                            strcpy( lineread, "" );
-                                            sleep(10);
-                                            failedbluetooth++;
-                                            if( failedbluetooth > 3 )
-                                                exit(-1);
-                                        }
-                                    }
-                                    else
-                                        //An Error has occurred
-                                        break;
-				}
-                                free( data );
-                                printf( "\n" );
-                          
+		      while( finished != 1 )
+		      {
+			if(( data = ReadStream( conf, flag,  &readRecord, s, received, &rr, data, &datalen, last_sent, cc, &terminated, &togo )) != NULL )
+			{
+			  j=0;
+			  for( i=0; i<datalen; i++ )
+			  {
+			    datarecord[j]=data[i];
+			    j++;
+			    if( j > 11 )
+			    {
+			      if( idate > 0 ) prev_idate=idate;
+			      else prev_idate=0;
+			      idate=ConvertStreamtoTime( datarecord, 4, &idate, &day, &month, &year, &hour, &minute, &second  );
+			      if( prev_idate == 0 )
+				prev_idate = idate-300;
+
+			      ConvertStreamtoFloat( datarecord+4, 8, &gtotal );
+			      if((*archdatalen) == 0 )
+				ptotal = gtotal;
+			      printf("\n%d/%d/%4d %02d:%02d:%02d  total=%.3f Kwh current=%.0f Watts togo=%d i=%d crc=%d", day, month, year, hour, minute,second, gtotal/1000, (gtotal-ptotal)*12, togo, i, crc_at_end);
+			      if( idate != prev_idate+300 )
+			      {
+				printf( "Date Error! prev=%d current=%d\n", (int)prev_idate, (int)idate );
+				error=1;
 				break;
-			    case 20: // SIGNAL signal strength
+			      }
+			      if( (*archdatalen) == 0 )
+				(*archdatalist) = ( ArchDataType *)malloc( sizeof( ArchDataType ) );
+			      else
+				(*archdatalist) = ( ArchDataType *)realloc( (*archdatalist), sizeof( ArchDataType )*((*archdatalen)+1));
+			      ((*archdatalist)+(*archdatalen))->date=idate;
+			      strcpy(((*archdatalist)+(*archdatalen))->inverter,unit[0]->Inverter);
+			      inverter_serial=(unit[0]->Serial[0]<<24)+(unit[0]->Serial[1]<<16)+(unit[0]->Serial[2]<<8)+unit[0]->Serial[3];
+			      ((*archdatalist)+(*archdatalen))->serial=inverter_serial;
+			      ((*archdatalist)+(*archdatalen))->accum_value=gtotal/1000;
+			      ((*archdatalist)+(*archdatalen))->current_value=(gtotal-ptotal)*12;
+			      (*archdatalen)++;
+			      ptotal=gtotal;
+			      j=0; //get ready for another record
+			    }
+			  }
+			  if( togo == 0 ) 
+			    finished=1;
+			  else
+			    if( read_bluetooth( conf, flag, &readRecord, s, &rr, received, cc, last_sent, &terminated ) != 0 )
+			      {
+				found=0;
+				/*
+				  if( (*archdatalen) > 0 )
+				  free( archdatalist );
+				  (*archdatalen)=0;
+				  if( (*livedatalen) > 0 )
+				  free( livedatalist );
+				  (*livedatalen)=0;
+				*/
+				strcpy( lineread, "" );
+				sleep(10);
+				failedbluetooth++;
+				if( failedbluetooth > 3 )
+				  exit(-1);
+			      }
+			}
+			else
+			  //An Error has occurred
+			  break;
+		      }
+		      free( data );
+		      printf( "\n" );
+                          
+		      break;
+
+		    case 20: // SIGNAL signal strength
                           
 				strength  = (received[22] * 100.0)/0xff;
 	                        if (flag->verbose == 1) {
@@ -880,10 +898,10 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                                        idate=ConvertStreamtoTime( data+i+4, 4, &idate, &day, &month, &year, &hour, &minute, &second  );
                                        ConvertStreamtoFloat( data+i+8, 3, &currentpower_total );
                                        return_key=-1;
-                                       for( j=0; j<conf->num_return_keys; j++ )
+                                       for(unsigned int uj=0; uj<conf->num_return_keys; uj++ )
                                        {
-                                          if(( (data+i+1)[0] == conf->returnkeylist[j].key1 )&&((data+i+2)[0] == conf->returnkeylist[j].key2)) {
-                                              return_key=j;
+                                          if(( (data+i+1)[0] == conf->returnkeylist[uj].key1 )&&((data+i+2)[0] == conf->returnkeylist[uj].key2)) {
+                                              return_key=uj;
                                               break;
                                           }
                                        }
@@ -907,10 +925,10 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                                 {
                                     gap = 0;
                                     return_key=-1;
-                                    for( j=0; j<conf->num_return_keys; j++ )
+                                    for(unsigned int uj=0; uj<conf->num_return_keys; uj++ )
                                     {
-                                       if(( (data+1)[0] == conf->returnkeylist[j].key1 )&&((data+2)[0] == conf->returnkeylist[j].key2)) {
-                                          return_key=j;
+                                       if(( (data+1)[0] == conf->returnkeylist[uj].key1 )&&((data+2)[0] == conf->returnkeylist[uj].key2)) {
+                                          return_key=uj;
                                           break;
                                        }
                                     }
@@ -926,10 +944,10 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
                                     {
                                        idate=ConvertStreamtoTime( data+i+4, 4, &idate, &day, &month, &year, &hour, &minute, &second  );
                                        return_key=-1;
-                                       for( j=0; j<conf->num_return_keys; j++ )
+                                       for(unsigned int uj=0; uj<conf->num_return_keys; uj++ )
                                        {
-                                          if(( (data+i+1)[0] == conf->returnkeylist[j].key1 )&&((data+i+2)[0] == conf->returnkeylist[j].key2)) {
-                                              return_key=j;
+                                          if(( (data+i+1)[0] == conf->returnkeylist[uj].key1 )&&((data+i+2)[0] == conf->returnkeylist[uj].key2)) {
+                                              return_key=uj;
                                               break;
                                           }
                                        }
@@ -1049,7 +1067,8 @@ int ProcessCommand( ConfType * conf, FlagType * flag, UnitType **unit, int *s, F
 		while (strcmp(lineread,"$END"));
  	}
            }
-    } 
+    }
+    return error;
 }
 /*
  * Run a command on an inverter
@@ -1090,7 +1109,7 @@ int OpenInverter( ConfType * conf, FlagType * flag, UnitType **unit, int * s, Ar
     }
     if( InverterCommand( "init", conf, flag, unit, s, fp, archdatalist, archdatalen, livedatalist, livedatalen ) == (char *)NULL )
 
-    close( fp );
+    fclose( fp );
     return( 0 );
 }
 
