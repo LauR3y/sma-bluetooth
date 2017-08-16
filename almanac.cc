@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "sma_struct.h"
-#include "sma_mysql.h"
+#include "sma_struct.hh"
+#include "sma_mysql.hh"
 
 char *  sunrise( ConfType *conf, int debug )
 {
@@ -61,7 +61,7 @@ char *  sunrise( ConfType *conf, int debug )
       localOffset-=24;
    if( debug == 1 ) printf( "localOffset=%f\n", localOffset );
    lngHour = longitude / 15;
-   if( debug == 1 ) printf( "long=%f lngHour=%d\n", longitude, lngHour );
+   if( debug == 1 ) printf( "long=%f lngHour=%f\n", longitude, lngHour );
    t = loctime->tm_yday + ((6 - lngHour) / 24);
    //Calculate the Sun's mean anomaly
    M = (0.9856 * t) - 3.289;

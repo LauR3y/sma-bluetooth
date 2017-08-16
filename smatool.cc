@@ -17,7 +17,7 @@
 
 /* compile gcc -lbluetooth -lcurl -lmysqlclient -g -o smatool smatool.c */
 
-#define _XOPEN_SOURCE /* glibc needs this */
+// #define _XOPEN_SOURCE /* glibc needs this */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,11 +31,21 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <curl/curl.h>
-#include "repost.h"
-#include "sma_mysql.h"
+#include "repost.hh"
+#include "sma_mysql.hh"
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/xpath.h>
 
+int todays_almanac( ConfType *conf, int debug = 0);
+char *  sunrise( ConfType *conf, int debug = 0);
+char * sunset( ConfType *conf, int debug = 0);
+void update_almanac( ConfType *conf, char * sunrise, char * sunset, int debug = 0 );
+int ConnectSocket ( ConfType * conf );
+int OpenInverter( ConfType * conf, FlagType * flag, UnitType **unit, int * s, ArchDataType **archdatalist, int *archdatalen , LiveDataType **livedatalist, int *livedatalen );
+char * InverterCommand(  const char * command, ConfType * conf, FlagType * flag, UnitType **unit, int *s, FILE * fp, ArchDataType **archdatalist, int *archdatalen , LiveDataType **livedatalist, int *livedatalen);
+
+// ORIG #define SMA_TOOL_XML "/usr/local/bin/smatool.xml"
+#define SMA_TOOL_XML "smatool.xml"
 
 /*
  * u16 represents an unsigned 16-bit number.  Adjust the typedef for
@@ -47,10 +57,10 @@ typedef u_int16_t u16;
 #define PPPGOODFCS16 0xf0b8 /* Good final FCS value */
 #define ASSERT(x) assert(x)
 #define SCHEMA "4"  /* Current database schema */
-#define _XOPEN_SOURCE /* glibc2 needs this */
+// #define _XOPEN_SOURCE /* glibc2 needs this */
 
 
-char *accepted_strings[] = {
+char const * const accepted_strings[] = {
 "$END",
 "$ADDR",
 "$TIME",
@@ -198,13 +208,11 @@ add_escapes(unsigned char *cp, int *len)
 void
 fix_length_send( FlagType * flag, unsigned char *cp, int *len)
 {
-    int	    delta=0;
-
     if( flag->debug == 1 ) 
        printf( "sum=%x\n", cp[1]+cp[3] );
     if(( cp[1] != (*len)+1 ))
     {
-      delta = (*len)+1 - cp[1];
+      //      int const delta = (*len)+1 - cp[1];
       if( flag->debug == 1 ) {
           printf( "  length change from %x to %x diff=%x \n", cp[1],(*len)+1,cp[1]+cp[3] );
       }
@@ -254,14 +262,13 @@ fix_length_send( FlagType * flag, unsigned char *cp, int *len)
 void
 fix_length_received(FlagType * flag, unsigned char *received, int *len)
 {
-    int	    delta=0;
     int	    sum;
 
     if( received[1] != (*len) )
     {
       sum = received[1]+received[3];
       if (flag->debug == 1) printf( "sum=%x", sum );
-      delta = (*len) - received[1];
+      // int const delta = (*len) - received[1];
       if (flag->debug == 1) printf( "length change from %x to %x\n", received[1], (*len) );
       if(( received[3] != 0x13 )&&( received[3] != 0x14 )) { 
         received[1] = (*len);
@@ -283,15 +290,13 @@ void
 tryfcs16(FlagType * flag, unsigned char *cp, int len, unsigned char *fl, int * cc)
 {
     u16 trialfcs;
-    unsigned
-    int i;	 
     unsigned char stripped[1024] = { 0 };
 
     memcpy( stripped, cp, len );
     /* add on output */
     if (flag->debug ==2){
  	printf("String to calculate FCS\n");	 
-        	for (i=0;i<len;i++) printf("%02x ",cp[i]);
+        	for(int i=0;i<len;i++) printf("%02x ",cp[i]);
 	 	printf("\n\n");
     }	
     trialfcs = pppfcs16( PPPINITFCS16, stripped, len );
@@ -355,7 +360,7 @@ unsigned char conv(char *nn)
 int
 check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int cc, unsigned char *last_sent, int *terminated, int *already_read )
 {
-    int bytes_read,i,j;
+    int bytes_read,j;
     unsigned char buf[1024]; /*read buffer*/
     unsigned char header[3]; /*read buffer*/
     struct timeval tv;
@@ -375,7 +380,7 @@ check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int
     if (FD_ISSET((*s), &readfds)){	// did we receive anything within 5 seconds
         bytes_read = recv((*s), header, sizeof(header), 0); //Get length of string
 	(*rr) = 0;
-        for( i=0; i<sizeof(header); i++ ) {
+        for(unsigned int i=0; i<sizeof(header); i++ ) {
             received[(*rr)] = header[i];
 	    if (flag->debug == 1) printf("%02x ", received[(*rr)]);
             (*rr)++;
@@ -403,13 +408,13 @@ check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int
            printf("\nReceiving\n");
            printf( "    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0 );
            j=12;
-           for( i=0; i<sizeof(header); i++ ) {
+           for(unsigned int i=0; i<sizeof(header); i++ ) {
               if( j%16== 0 )
                  printf( "\n    %08x: ",j);
               printf("%02x ",header[i]);
               j++;
            }
-	   for (i=0;i<bytes_read;i++) {
+	   for (int i=0;i<bytes_read;i++) {
               if( j%16== 0 )
                  printf( "\n    %08x: ",j);
               printf("%02x ",buf[i]);
@@ -426,7 +431,7 @@ check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int
            (*terminated) = 1;
         else
            (*terminated) = 0;
-        for (i=0;i<bytes_read;i++){ //start copy the rec buffer in to received
+        for (int i=0;i<bytes_read;i++){ //start copy the rec buffer in to received
             if (buf[i] == 0x7d){ //did we receive the escape char
 	        switch (buf[i+1]){   // act depending on the char after the escape char
 					
@@ -453,7 +458,7 @@ check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int
         fix_length_received( flag, received, rr );
 	if (flag->debug == 1) {
 	    printf("\n");
-            for( i=0;i<(*rr); i++ ) printf("%02x ", received[(i)]);
+            for(int i=0;i<(*rr); i++ ) printf("%02x ", received[(i)]);
         }
 	if (flag->debug == 1) printf("\n\n");
         (*already_read)=1;
@@ -464,10 +469,10 @@ check_send_error( FlagType * flag, int *s, int *rr, unsigned char *received, int
 int
 empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRecord, int *s, int *rr, unsigned char *received, int cc, unsigned char *last_sent, int *terminated )
 {
-    int bytes_read,i,j, last_decoded;
+    int bytes_read,j, last_decoded;
     unsigned char buf[1024]; /*read buffer*/
     unsigned char header[4]; /*read buffer*/
-    unsigned char checkbit;
+    //    unsigned char checkbit;
     struct timeval tv;
     fd_set readfds;
 
@@ -488,7 +493,7 @@ empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRe
     if (FD_ISSET((*s), &readfds)){	// did we receive anything within 5 seconds
         bytes_read = recv((*s), header, sizeof(header), 0); //Get length of string
 	(*rr) = 0;
-        for( i=0; i<sizeof(header); i++ ) {
+        for(unsigned int i=0; i<sizeof(header); i++ ) {
             received[(*rr)] = header[i];
 	    if (flag->debug == 2) printf("%02x ", received[i]);
             (*rr)++;
@@ -546,21 +551,21 @@ empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRe
            printf("                      checkbit:          %d", header[3] );
            printf("\n   " );
            //Source Address
-           for( i=0; i<bytes_read; i++ ) {
+           for(int i=0; i<bytes_read; i++ ) {
               if( i > 5 ) break;
               printf("%02x ",buf[i]);
            }
            printf("       source:            %02x:%02x:%02x:%02x:%02x:%02x", buf[5], buf[4], buf[3], buf[2], buf[1], buf[0] );
            printf("\n   " );
            //Destination Address
-           for( i=6; i<bytes_read; i++ ) {
+           for(int i=6; i<bytes_read; i++ ) {
               if( i > 11 ) break;
               printf("%02x ",buf[i]);
            }
            printf("       destination:       %02x:%02x:%02x:%02x:%02x:%02x", buf[11], buf[10], buf[9], buf[8], buf[7], buf[6] );
            printf("\n   " );
            //Destination Address
-           for( i=12; i<bytes_read; i++ ) {
+           for(int i=12; i<bytes_read; i++ ) {
               if( i > 13 ) break;
               printf("%02x ",buf[i]);
            }
@@ -571,37 +576,37 @@ empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRe
            last_decoded=14;
            if( memcmp( buf+14, "\x7e\xff\x03\x60\x65", 5 ) == 0 ){
                printf("\n");
-               for( i=14; i<bytes_read; i++ ) {
+               for(int i=14; i<bytes_read; i++ ) {
                    if( i > 18 ) break;
                    printf("%02x ",buf[i]);
                }
                printf("             SMA Data2+ header: %02x:%02x:%02x:%02x:%02x", buf[18], buf[17], buf[16], buf[15], buf[14] );
                printf("\n   " );
-               for( i=19; i<bytes_read; i++ ) {
+               for(int i=19; i<bytes_read; i++ ) {
                    if( i > 19 ) break;
                    printf("%02x ",buf[i]);
                }
                printf("                      data packet size:  %02d", buf[19] );
                printf("\n   " );
-               for( i=20; i<bytes_read; i++ ) {
+               for(int i=20; i<bytes_read; i++ ) {
                    if( i > 20 ) break;
                    printf("%02x ",buf[i]);
                }
                printf("                      control:           %02x", buf[20] );
                printf("\n   " );
-               for( i=21; i<bytes_read; i++ ) {
+               for(int i=21; i<bytes_read; i++ ) {
                    if( i > 26 ) break;
                    printf("%02x ",buf[i]);
                }
                printf("       source:            %02x %02x:%02x:%02x:%02x:%02x", buf[21], buf[26], buf[25], buf[24], buf[23], buf[22] );
                printf("\n   " );
-               for( i=27; i<bytes_read; i++ ) {
+               for(int i=27; i<bytes_read; i++ ) {
                    if( i > 28 ) break;
                    printf("%02x ",buf[i]);
                }
                printf("                   read status:       %02x %02x", buf[28], buf[27] );
                printf("\n   " );
-               for( i=29; i<bytes_read; i++ ) {
+               for(int i=29; i<bytes_read; i++ ) {
                    if( i > 30 ) break;
                    printf("%02x ",buf[i]);
                }
@@ -609,7 +614,7 @@ empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRe
                readRecord->Status[1]=buf[27];
                printf("                   count up:          %02d %02x:%02x", buf[29]+buf[30]*256, buf[30], buf[29] );
                printf("\n   " );
-               for( i=31; i<bytes_read; i++ ) {
+               for(int i=31; i<bytes_read; i++ ) {
                    if( i > 32 ) break;
                    printf("%02x ",buf[i]);
                }
@@ -619,7 +624,7 @@ empty_read_bluetooth(  ConfType * conf, FlagType * flag, ReadRecordType * readRe
            }
            printf("\n   " );
            j=0;
-	   for (i=last_decoded;i<bytes_read;i++) {
+	   for (int i=last_decoded;i<bytes_read;i++) {
               if( j%16== 0 )
                  printf( "\n   %08x: ",j);
               printf("%02x ",buf[i]);
@@ -664,7 +669,7 @@ read_bluetooth( ConfType * conf, FlagType * flag, ReadRecordType * readRecord, i
     if (FD_ISSET((*s), &readfds)){	// did we receive anything within 5 seconds
         bytes_read = recv((*s), header, sizeof(header), 0); //Get length of string
 	(*rr) = 0;
-        for( i=0; i<sizeof(header); i++ ) {
+        for(unsigned int i=0; i<sizeof(header); i++ ) {
             received[(*rr)] = header[i];
 	    if (flag->debug == 2) printf("%02x ", received[i]);
             (*rr)++;
@@ -843,8 +848,7 @@ read_bluetooth( ConfType * conf, FlagType * flag, ReadRecordType * readRecord, i
 
 int select_str(char *s)
 {
-    int i;
-    for (i=0; i < sizeof(accepted_strings)/sizeof(*accepted_strings);i++)
+    for (unsigned int i=0; i < sizeof(accepted_strings)/sizeof(*accepted_strings);i++)
     {
        //printf( "\ni=%d accepted=%s string=%s", i, accepted_strings[i], s );
        if (!strcmp(s, accepted_strings[i])) return i;
@@ -858,12 +862,11 @@ unsigned char *  get_timezone_in_seconds( FlagType * flag, unsigned char *tzhex 
    struct tm *loctime;
    struct tm *utctime;
    int day,month,year,hour,minute,isdst;
-   char *returntime;
 
    float localOffset;
    int	 tzsecs;
 
-   returntime = (char *)malloc(6*sizeof(char));
+   //   char * returntime = (char *)malloc(6*sizeof(char));
    curtime = time(NULL);  //get time in seconds since epoch (1/1/1970)	
    loctime = localtime(&curtime);
    day = loctime->tm_mday;
@@ -902,7 +905,7 @@ int auto_set_dates( ConfType * conf, FlagType * flag )
     MYSQL_ROW 	row;
     char 	SQLQUERY[200];
     time_t  	curtime;
-    int 	day,month,year,hour,minute,second;
+    int 	day,month,year,hour,minute; // ,second;
     struct tm 	*loctime;
 
     if( flag->mysql == 1 )
@@ -929,7 +932,7 @@ int auto_set_dates( ConfType * conf, FlagType * flag )
     year = loctime->tm_year + 1900;
     hour = loctime->tm_hour;
     minute = loctime->tm_min; 
-    second = loctime->tm_sec; 
+    // second = loctime->tm_sec; 
     sprintf( conf->dateto, "%04d-%02d-%02d %02d:%02d:00", year, month, day, hour, minute );
     flag->daterange=1;
     if( flag->verbose == 1 ) printf( "Auto set dates from %s to %s\n", conf->datefrom, conf->dateto );
@@ -961,7 +964,7 @@ int is_light( ConfType * conf, FlagType * flag )
           if( atoi( (char *)row[0] ) == 1 ) light=0;
        }
     }
-    if (flag->debug == 1) printf("Before close\n",SQLQUERY);
+    if (flag->debug == 1) printf("Before close [%s]\n",SQLQUERY);
     
     mysql_close(conn);
     return light;
@@ -1023,16 +1026,15 @@ float ConvertStreamtoFloat( unsigned char * stream, int length, float * value )
 char * ConvertStreamtoString( unsigned char * stream, int length )
 {
    int	i, j=0, nullvalue;
-   char * value;
    
    nullvalue = 1;
 
-   value = malloc( sizeof(char)*10+1 );
+   char * value = (char*)malloc( sizeof(char)*10+1 );
    for( i=0; i < length; i++ ) 
    {
       if( i%10 > j ) {
             j++;
-	    value = realloc( value, sizeof(char)*10*j+1 );
+	    value = (char*)realloc( value, sizeof(char)*10*j+1 );
       }
       if( stream[i] != 0xff ) //check if all ffs which is a null value 
         nullvalue = 0;
@@ -1053,9 +1055,9 @@ InitReturnKeys( ConfType * conf )
    FILE		*fp;
    char		line[400];
    ReturnType   tmp;
-   ReturnType   *returnkeylist;
+   ReturnType   *returnkeylist = 0;
    int		num_return_keys=0;
-   int		i, j, reading, data_follows;
+   int		data_follows;
 
    data_follows = 0;
 
@@ -1085,7 +1087,6 @@ InitReturnKeys( ConfType * conf )
                     tmp.datalength=0;
                     tmp.recordgap=0;
                     tmp.persistent=1;
-                    reading=0;
                     if( sscanf( line, "%x %x \"%[^\"]\" \"%[^\"]\" %d %d %d %d", &tmp.key1, &tmp.key2, tmp.description, tmp.units, &tmp.decimal, &tmp.recordgap, &tmp.datalength, &tmp.persistent ) == 8 ) {
                               
                         if( (num_return_keys) == 0 )
@@ -1268,7 +1269,7 @@ void InitConfig( ConfType *conf )
     conf->bt_timeout = 30;  
     strcpy( conf->Password, "0000" );  
     strcpy( conf->File, "sma.in" );  
-    strcpy( conf->Xml, "/usr/local/bin/smatool.xml" );  
+    strcpy( conf->Xml, SMA_TOOL_XML );  
     conf->latitude_f = 999 ;  
     conf->longitude_f = 999 ;  
     strcpy( conf->MySqlHost, "localhost" );  
@@ -1370,7 +1371,6 @@ int GetInverterSetting( ConfType *conf, FlagType * flag )
     char	line[400];
     char	variable[400];
     char	value[400];
-    int		found_inverter=0;
 
     if (strlen(conf->Setting) > 0 )
     {
@@ -1467,10 +1467,8 @@ getnodeset (xmlDocPtr doc, xmlChar *xpath){
 int
 setup_xml_xpath( ConfType *conf, xmlChar * xpath, char * docname, int index )
 {
-    int len;
-
-    sprintf( xpath, "//Datamap/Map[@index='%d']", index );
-    sprintf( docname, "%s", "/usr/local/bin/smatool.xml" );
+    sprintf( (char*)xpath, "//Datamap/Map[@index='%d']", index );
+    sprintf( docname, "%s", SMA_TOOL_XML );
     return (1);
 }
 
@@ -1497,8 +1495,8 @@ return_xml_data( ConfType *conf, int index )
             while (cur != NULL ) {
 		if( xmlStrEqual(cur->name, (const xmlChar *)"Value")) {
       		    keyword = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-                    return_string=malloc(sizeof(char)*strlen(keyword)+1);
-                    strcpy( return_string, keyword );
+                    return_string=(char*)malloc(sizeof(char)*strlen((char*)keyword)+1);
+                    strcpy( return_string, (char*)keyword );
                     xmlFree(keyword);
 		}
 	    	cur = cur->next;
@@ -1710,21 +1708,17 @@ char * debugdate()
 int main(int argc, char **argv)
 {
     FILE 		*fp;
-    unsigned char 	* last_sent;
     ConfType 		conf;
     FlagType 		flag;
     int 		maximumUnits=1;
     UnitType 		*unit;
-    ReadRecordType 	readRecord;
-    ReturnType 		*returnkeylist;
     unsigned char 	received[1024];
     int			i,s;
-    int 		install=0, update=0, already_read=0, no_dark=0;
+    int 		install=0, update=0, no_dark=0;
     int 		error=0;
-    int 		max_output;
+    int 		max_output = 0;
     char 		compurl[400];  //seg error on curl fix 2012.01.14
     unsigned char 	tzhex[2] = { 0 };
-    time_t 		reporttime;
     MYSQL_ROW 		row, row1;
     char 		SQLQUERY[200];
     int			archdatalen=0, livedatalen=0;
@@ -1742,9 +1736,6 @@ int main(int argc, char **argv)
         exit(1);
     }
     memset(received,0,1024);
-    last_sent = (unsigned  char *)malloc( sizeof( unsigned char ));
-    /* get the report time - used in various places */
-    reporttime = time(NULL);  //get time in seconds since epoch (1/1/1970)	
    
     // set config to defaults
     InitConfig( &conf );
@@ -1765,7 +1756,7 @@ int main(int argc, char **argv)
     SetSwitches( &conf, &flag );  
     if(( install==1 )&&( flag.mysql==1 ))
     {
-        install_mysql_tables( &conf, &flag, SCHEMA );
+      install_mysql_tables( &conf, &flag, (char*)SCHEMA );
         exit(0);
     }
     if(( update==1 )&&( flag.mysql==1 ))
@@ -1774,7 +1765,8 @@ int main(int argc, char **argv)
         exit(0);
     }
     // Get Return Value lookup from file
-    returnkeylist = InitReturnKeys( &conf );
+    // ReturnType 		* returnkeylist =
+    InitReturnKeys( &conf );
     // Set value for inverter type
     
     SetInverterType( &conf, &unit );
@@ -1792,7 +1784,7 @@ int main(int argc, char **argv)
     }
     if( flag.mysql==1 ) { 
         if( flag.debug == 1 ) printf( "Before Check Schema\n" ); 
-       	if( check_schema( &conf, &flag,  SCHEMA ) != 1 )
+       	if( check_schema( &conf, &flag,  (char*)SCHEMA ) != 1 )
             exit(-1);
         if(flag.daterange==0 ) { //auto set the dates
             if( flag.debug == 1 ) printf( "auto_set_dates\n" ); 
@@ -1805,7 +1797,7 @@ int main(int argc, char **argv)
     {
 	if (flag.debug ==1) printf("Address %s\n",conf.BTAddress);
         //Connect to Inverter
-        if ((s = ConnectSocket( &conf, &flag )) < 0 )
+        if ((s = ConnectSocket( &conf )) < 0 )
            exit( -1 );
 
         if (flag.file ==1)
@@ -1847,7 +1839,13 @@ int main(int argc, char **argv)
         OpenMySqlDatabase( conf.MySqlHost, conf.MySqlUser, conf.MySqlPwd, conf.MySqlDatabase );
         for( i=1; i<archdatalen; i++ ) //Start at 1 as the first record is a dummy
         {
-	    sprintf(SQLQUERY,"INSERT INTO DayData ( DateTime, Inverter, Serial, CurrentPower, EtotalToday ) VALUES ( FROM_UNIXTIME(%ld),\'%s\',%ld,%0.f, %.3f ) ON DUPLICATE KEY UPDATE DateTime=Datetime, Inverter=VALUES(Inverter), Serial=VALUES(Serial), CurrentPower=VALUES(CurrentPower), EtotalToday=VALUES(EtotalToday)",(archdatalist+i)->date, (archdatalist+i)->inverter, (archdatalist+i)->serial, (archdatalist+i)->current_value, (archdatalist+i)->accum_value );
+	    sprintf(SQLQUERY, "INSERT INTO DayData ( DateTime, Inverter, "
+		    "Serial, CurrentPower, EtotalToday ) VALUES "
+		    "( FROM_UNIXTIME(%ld),\'%s\',%lld,%0.f, %.3f ) "
+		    "ON DUPLICATE KEY UPDATE DateTime=Datetime, "
+		    "Inverter=VALUES(Inverter), Serial=VALUES(Serial), "
+		    "CurrentPower=VALUES(CurrentPower), EtotalToday=VALUES(EtotalToday)",
+		    (archdatalist+i)->date, (archdatalist+i)->inverter, (archdatalist+i)->serial, (archdatalist+i)->current_value, (archdatalist+i)->accum_value );
 	    if (flag.debug == 1) printf("%s\n",SQLQUERY);
 	    DoQuery(SQLQUERY);
             //getchar();
@@ -1989,7 +1987,7 @@ int main(int argc, char **argv)
     close(s);
     if ((flag.repost ==1)&&(error==0)){
         printf( "\nrepost\n" ); //getchar();
-        sma_repost( &conf );
+        sma_repost( &conf, 0 );
 }
 
 return 0;

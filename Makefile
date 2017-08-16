@@ -1,22 +1,20 @@
-ARCH := $(shell getconf LONG_BIT)
-C_FLAGS_64 := -L/usr/lib64/mysql
-C_FLAGS_32 := -L/usr/lib/mysql
 
+CXXFLAGS=-I /usr/include/libxml2 -fstack-protector-all -O2 -Wall -Werror --std=c++11
 
-smatool: smatool.o repost.o sma_mysql.o almanac.o sb_commands.o sma_struct.h
-	gcc smatool.o repost.o sma_mysql.o almanac.o sb_commands.o -fstack-protector-all -O2 -Wall $(C_FLAGS_$(ARCH)) -lxml2 -lmysqlclient -lbluetooth -lcurl -lm -o smatool 
-smatool.o: smatool.c sma_mysql.h
-	gcc -O2 -c smatool.c
-repost.o: repost.c sma_mysql.h
-	gcc -O2 -c repost.c
-sma_mysql.o: sma_mysql.c
-	gcc -O2 -c sma_mysql.c
-almanac.o: almanac.c
-	gcc -O2 -c almanac.c
-sma_pvoutput.o: sma_pvoutput.c
-	gcc -O2 -c sma_pvoutput.c
-sb_commands.o: sb_commands.c
-	gcc -O2 -c sb_commands.c
+smatool: smatool.o repost.o sma_mysql.o almanac.o sb_commands.o sma_struct.hh
+	gcc $(CXXFLAGS) smatool.o repost.o sma_mysql.o almanac.o sb_commands.o -lxml2 -L/usr/lib/x86_64-linux-gnu -lmariadb -lbluetooth -lcurl -lm -o smatool 
+smatool.o: smatool.cc sma_mysql.hh
+	gcc -O2 $(CXXFLAGS) -c smatool.cc
+repost.o: repost.cc sma_mysql.hh
+	gcc -O2 $(CXXFLAGS) -c repost.cc
+sma_mysql.o: sma_mysql.cc
+	gcc -O2 $(CXXFLAGS) -c sma_mysql.cc
+almanac.o: almanac.cc
+	gcc -O2 $(CXXFLAGS) -c almanac.cc
+sma_pvoutput.o: sma_pvoutput.cc
+	gcc -O2 $(CXXFLAGS) -c sma_pvoutput.cc
+sb_commands.o: sb_commands.cc
+	gcc -O2 $(CXXFLAGS) -c sb_commands.cc
 clean:
 	rm *.o
 install:
