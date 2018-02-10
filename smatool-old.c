@@ -313,7 +313,7 @@ fix_length_send (unsigned char *cp, int *len)
           cp[3] = 0x1e;
           break;
         default:
-          printf ("NO CONVERSION!");
+          printf ("NO CONVERSION! %x", cp[1]);
           getchar ();
           break;
         }
