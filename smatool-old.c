@@ -17,7 +17,7 @@
 
 /* compile gcc -lbluetooth -lcurl -lmysqlclient -g -o smatool smatool.c */
 
-#define _XOPEN_SOURCE		/* glibc needs this */
+#define _XOPEN_SOURCE           /* glibc needs this */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -38,33 +38,33 @@
  */
 typedef u_int16_t u16;
 
-#define PPPINITFCS16 0xffff	/* Initial FCS value    */
-#define PPPGOODFCS16 0xf0b8	/* Good final FCS value */
+#define PPPINITFCS16 0xffff     /* Initial FCS value    */
+#define PPPGOODFCS16 0xf0b8     /* Good final FCS value */
 #define ASSERT(x) assert(x)
-#define SCHEMA "2"		/* Current database schema */
-#define _XOPEN_SOURCE		/* glibc2 needs this */
+#define SCHEMA "2"              /* Current database schema */
+#define _XOPEN_SOURCE           /* glibc2 needs this */
 
 
 typedef struct
 {
-  char Inverter[20];	    /*--inverter    -i  */
-  char BTAddress[20];		/*--address     -a  */
-  int bt_timeout;	    /*--timeout     -t  */
-  char Password[20];		/*--password    -p  */
-  char Config[80];		/*--config      -c  */
-  char File[80];		/*--file        -f  */
-  float latitude_f;		/*--latitude    -la     */
-  float longitude_f;		/*--longitude   -lo     */
-  char MySqlHost[40];		/*--mysqlhost   -h  */
-  char MySqlDatabase[20];	/*--mysqldb     -d  */
-  char MySqlUser[80];		/*--mysqluser   -user   */
-  char MySqlPwd[80];		/*--mysqlpwd    -pwd    */
-  char PVOutputURL[80];		/*--pvouturl    -url    */
-  char PVOutputKey[80];		/*--pvoutkey    -key    */
-  char PVOutputSid[20];		/*--pvoutsid    -sid    */
-  char Setting[80];		/*inverter model data */
-  unsigned char InverterCode[4];	/*Unknown code inverter specific */
-  unsigned int ArchiveCode;	/* Code for archive data */
+  char Inverter[20];        /*--inverter    -i  */
+  char BTAddress[20];           /*--address     -a  */
+  int bt_timeout;           /*--timeout     -t  */
+  char Password[20];            /*--password    -p  */
+  char Config[80];              /*--config      -c  */
+  char File[80];                /*--file        -f  */
+  float latitude_f;             /*--latitude    -la     */
+  float longitude_f;            /*--longitude   -lo     */
+  char MySqlHost[40];           /*--mysqlhost   -h  */
+  char MySqlDatabase[20];       /*--mysqldb     -d  */
+  char MySqlUser[80];           /*--mysqluser   -user   */
+  char MySqlPwd[80];            /*--mysqlpwd    -pwd    */
+  char PVOutputURL[80];         /*--pvouturl    -url    */
+  char PVOutputKey[80];         /*--pvoutkey    -key    */
+  char PVOutputSid[20];         /*--pvoutsid    -sid    */
+  char Setting[80];             /*inverter model data */
+  unsigned char InverterCode[4];        /*Unknown code inverter specific */
+  unsigned int ArchiveCode;     /* Code for archive data */
 } ConfType;
 
 typedef struct
@@ -102,9 +102,9 @@ char *accepted_strings[] = {
   "$INVCODE",
   "$ARCHCODE",
   "$INVERTERDATA",
-  "$CNT",			/*Counter of sent packets */
-  "$TIMEZONE",			/*Timezone seconds +1 from GMT */
-  "$TIMESET"			/*Unknown string involved in time setting */
+  "$CNT",                       /*Counter of sent packets */
+  "$TIMEZONE",                  /*Timezone seconds +1 from GMT */
+  "$TIMESET"                    /*Unknown string involved in time setting */
 };
 
 int cc, debug = 0, verbose = 0;
@@ -176,12 +176,12 @@ strip_escapes (unsigned char *cp, int *len)
   for (i = 0; i < (*len); i++)
     {
       if (cp[i] == 0x7d)
-	{			/*Found escape character. Need to convert */
-	  cp[i] = cp[i + 1] ^ 0x20;
-	  for (j = i + 1; j < (*len) - 1; j++)
-	    cp[j] = cp[j + 1];
-	  (*len)--;
-	}
+        {                       /*Found escape character. Need to convert */
+          cp[i] = cp[i + 1] ^ 0x20;
+          for (j = i + 1; j < (*len) - 1; j++)
+            cp[j] = cp[j + 1];
+          (*len)--;
+        }
     }
 }
 
@@ -196,18 +196,18 @@ add_escapes (unsigned char *cp, int *len)
   for (i = 19; i < (*len); i++)
     {
       switch (cp[i])
-	{
-	case 0x7d:
-	case 0x7e:
-	case 0x11:
-	case 0x12:
-	case 0x13:
-	  for (j = (*len); j > i; j--)
-	    cp[j] = cp[j - 1];
-	  cp[i + 1] = cp[i] ^ 0x20;
-	  cp[i] = 0x7d;
-	  (*len)++;
-	}
+        {
+        case 0x7d:
+        case 0x7e:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+          for (j = (*len); j > i; j--)
+            cp[j] = cp[j - 1];
+          cp[i + 1] = cp[i] ^ 0x20;
+          cp[i] = 0x7d;
+          (*len)++;
+        }
     }
 }
 
@@ -225,100 +225,100 @@ fix_length_send (unsigned char *cp, int *len)
     {
       delta = (*len) + 1 - cp[1];
       if (debug == 1)
-	{
-	  printf ("  length change from %x to %x diff=%x \n", cp[1],
-		  (*len) + 1, cp[1] + cp[3]);
-	}
+        {
+          printf ("  length change from %x to %x diff=%x \n", cp[1],
+                  (*len) + 1, cp[1] + cp[3]);
+        }
       cp[3] = (cp[1] + cp[3]) - ((*len) + 1);
       cp[1] = (*len) + 1;
 
       switch (cp[1])
-	{
-	case 0x3a:
-	  cp[3] = 0x44;
-	  break;
-	case 0x3b:
-	  cp[3] = 0x43;
-	  break;
-	case 0x3c:
-	  cp[3] = 0x42;
-	  break;
-	case 0x3d:
-	  cp[3] = 0x41;
-	  break;
-	case 0x3e:
-	  cp[3] = 0x40;
-	  break;
-	case 0x3f:
-	  cp[3] = 0x41;
-	  break;
-	case 0x40:
-	  cp[3] = 0x3e;
-	  break;
-	case 0x41:
-	  cp[3] = 0x3f;
-	  break;
-	case 0x42:
-	  cp[3] = 0x3c;
-	  break;
-	case 0x52:
-	  cp[3] = 0x2c;
-	  break;
-	case 0x53:
-	  cp[3] = 0x2b;
-	  break;
-	case 0x54:
-	  cp[3] = 0x2a;
-	  break;
-	case 0x55:
-	  cp[3] = 0x29;
-	  break;
-	case 0x56:
-	  cp[3] = 0x28;
-	  break;
-	case 0x57:
-	  cp[3] = 0x27;
-	  break;
-	case 0x58:
-	  cp[3] = 0x26;
-	  break;
-	case 0x59:
-	  cp[3] = 0x25;
-	  break;
-	case 0x5a:
-	  cp[3] = 0x24;
-	  break;
-	case 0x5b:
-	  cp[3] = 0x23;
-	  break;
-	case 0x5c:
-	  cp[3] = 0x22;
-	  break;
-	case 0x5d:
-	  cp[3] = 0x23;
-	  break;
-	case 0x5e:
-	  cp[3] = 0x20;
-	  break;
-	case 0x5f:
-	  cp[3] = 0x21;
-	  break;
-	case 0x60:
-	  cp[3] = 0x1e;
-	  break;
-	case 0x61:
-	  cp[3] = 0x1f;
-	  break;
-	case 0x62:
-	  cp[3] = 0x1e;
-	  break;
-	default:
-	  printf ("NO CONVERSION!");
-	  getchar ();
-	  break;
-	}
+        {
+        case 0x3a:
+          cp[3] = 0x44;
+          break;
+        case 0x3b:
+          cp[3] = 0x43;
+          break;
+        case 0x3c:
+          cp[3] = 0x42;
+          break;
+        case 0x3d:
+          cp[3] = 0x41;
+          break;
+        case 0x3e:
+          cp[3] = 0x40;
+          break;
+        case 0x3f:
+          cp[3] = 0x41;
+          break;
+        case 0x40:
+          cp[3] = 0x3e;
+          break;
+        case 0x41:
+          cp[3] = 0x3f;
+          break;
+        case 0x42:
+          cp[3] = 0x3c;
+          break;
+        case 0x52:
+          cp[3] = 0x2c;
+          break;
+        case 0x53:
+          cp[3] = 0x2b;
+          break;
+        case 0x54:
+          cp[3] = 0x2a;
+          break;
+        case 0x55:
+          cp[3] = 0x29;
+          break;
+        case 0x56:
+          cp[3] = 0x28;
+          break;
+        case 0x57:
+          cp[3] = 0x27;
+          break;
+        case 0x58:
+          cp[3] = 0x26;
+          break;
+        case 0x59:
+          cp[3] = 0x25;
+          break;
+        case 0x5a:
+          cp[3] = 0x24;
+          break;
+        case 0x5b:
+          cp[3] = 0x23;
+          break;
+        case 0x5c:
+          cp[3] = 0x22;
+          break;
+        case 0x5d:
+          cp[3] = 0x23;
+          break;
+        case 0x5e:
+          cp[3] = 0x20;
+          break;
+        case 0x5f:
+          cp[3] = 0x21;
+          break;
+        case 0x60:
+          cp[3] = 0x1e;
+          break;
+        case 0x61:
+          cp[3] = 0x1f;
+          break;
+        case 0x62:
+          cp[3] = 0x1e;
+          break;
+        default:
+          printf ("NO CONVERSION!");
+          getchar ();
+          break;
+        }
       if (debug == 1)
-	printf ("new sum=%x\n", cp[1] + cp[3]);
+        printf ("new sum=%x\n", cp[1] + cp[3]);
     }
 }
 
@@ -335,32 +335,32 @@ fix_length_received (unsigned char *received, int *len)
     {
       sum = received[1] + received[3];
       if (debug == 1)
-	printf ("sum=%x", sum);
+        printf ("sum=%x", sum);
       delta = (*len) - received[1];
       if (debug == 1)
-	printf ("length change from %x to %x\n", received[1], (*len));
+        printf ("length change from %x to %x\n", received[1], (*len));
       if ((received[3] != 0x13) && (received[3] != 0x14))
-	{
-	  received[1] = (*len);
-	  switch (received[1])
-	    {
-	    case 0x52:
-	      received[3] = 0x2c;
-	      break;
-	    case 0x5a:
-	      received[3] = 0x24;
-	      break;
-	    case 0x66:
-	      received[3] = 0x1a;
-	      break;
-	    case 0x6a:
-	      received[3] = 0x14;
-	      break;
-	    default:
-	      received[3] = sum - received[1];
-	      break;
-	    }
-	}
+        {
+          received[1] = (*len);
+          switch (received[1])
+            {
+            case 0x52:
+              received[3] = 0x2c;
+              break;
+            case 0x5a:
+              received[3] = 0x24;
+              break;
+            case 0x66:
+              received[3] = 0x1a;
+              break;
+            case 0x6a:
+              received[3] = 0x14;
+              break;
+            default:
+              received[3] = sum - received[1];
+              break;
+            }
+        }
     }
 }
 
@@ -380,18 +380,18 @@ tryfcs16 (unsigned char *cp, int len)
     {
       printf ("String to calculate FCS\n");
       for (i = 0; i < len; i++)
-	printf ("%02x ", cp[i]);
+        printf ("%02x ", cp[i]);
       printf ("\n\n");
     }
   trialfcs = pppfcs16 (PPPINITFCS16, stripped, len);
-  trialfcs ^= 0xffff;		/* complement */
-  fl[cc] = (trialfcs & 0x00ff);	/* least significant byte first */
+  trialfcs ^= 0xffff;           /* complement */
+  fl[cc] = (trialfcs & 0x00ff); /* least significant byte first */
   fl[cc + 1] = ((trialfcs >> 8) & 0x00ff);
   cc += 2;
   if (debug == 2)
     {
       printf ("FCS = %x%x %x\n", (trialfcs & 0x00ff),
-	      ((trialfcs >> 8) & 0x00ff), trialfcs);
+              ((trialfcs >> 8) & 0x00ff), trialfcs);
     }
 }
 
@@ -405,42 +405,42 @@ conv (char *nn)
   for (i = 0; i < 2; i++)
     {
       switch (nn[i])
-	{
+        {
 
-	case 65:
-	/*A*/ case 97:		/*a */
-	  tt = 10;
-	  break;
+        case 65:
+        /*A*/ case 97:          /*a */
+          tt = 10;
+          break;
 
-	case 66:
-	/*B*/ case 98:		/*b */
-	  tt = 11;
-	  break;
+        case 66:
+        /*B*/ case 98:          /*b */
+          tt = 11;
+          break;
 
-	case 67:
-	/*C*/ case 99:		/*c */
-	  tt = 12;
-	  break;
+        case 67:
+        /*C*/ case 99:          /*c */
+          tt = 12;
+          break;
 
-	case 68:
-	/*D*/ case 100:	/*d */
-	  tt = 13;
-	  break;
+        case 68:
+        /*D*/ case 100: /*d */
+          tt = 13;
+          break;
 
-	case 69:
-	/*E*/ case 101:	/*e */
-	  tt = 14;
-	  break;
+        case 69:
+        /*E*/ case 101: /*e */
+          tt = 14;
+          break;
 
-	case 70:
-	/*F*/ case 102:	/*f */
-	  tt = 15;
-	  break;
+        case 70:
+        /*F*/ case 102: /*f */
+          tt = 15;
+          break;
 
 
-	default:
-	  tt = nn[i] - 48;
-	}
+        default:
+          tt = nn[i] - 48;
+        }
       res = res + (tt * pow (16, 1 - i));
     }
   return res;
@@ -448,16 +448,16 @@ conv (char *nn)
 
 int
 check_send_error (ConfType * conf, int *s, int *rr, unsigned char *received,
-		  int cc, unsigned char *last_sent, int *terminated,
-		  int *already_read)
+                  int cc, unsigned char *last_sent, int *terminated,
+                  int *already_read)
 {
   int bytes_read, i, j;
-  unsigned char buf[1024];	/*read buffer */
-  unsigned char header[3];	/*read buffer */
+  unsigned char buf[1024];      /*read buffer */
+  unsigned char header[3];      /*read buffer */
   struct timeval tv;
   fd_set readfds;
 
-  tv.tv_sec = 0;		// set timeout of reading
+  tv.tv_sec = 0;                // set timeout of reading
   tv.tv_usec = 5000;
   memset (buf, 0, 1024);
 
@@ -466,36 +466,36 @@ check_send_error (ConfType * conf, int *s, int *rr, unsigned char *received,
 
   select ((*s) + 1, &readfds, NULL, NULL, &tv);
 
-  (*terminated) = 0;		// Tag to tell if string has 7e termination
+  (*terminated) = 0;            // Tag to tell if string has 7e termination
   // first read the header to get the record length
   if (FD_ISSET ((*s), &readfds))
-    {				// did we receive anything within 5 seconds
-      bytes_read = recv ((*s), header, sizeof (header), 0);	//Get length of string
+    {                           // did we receive anything within 5 seconds
+      bytes_read = recv ((*s), header, sizeof (header), 0);     //Get length of string
       (*rr) = 0;
       for (i = 0; i < sizeof (header); i++)
-	{
-	  received[(*rr)] = header[i];
-	  if (debug == 1)
-	    printf ("%02x ", received[(*rr)]);
-	  (*rr)++;
-	}
+        {
+          received[(*rr)] = header[i];
+          if (debug == 1)
+            printf ("%02x ", received[(*rr)]);
+          (*rr)++;
+        }
     }
   else
     {
       if (verbose == 1)
-	printf ("Timeout reading bluetooth socket\n");
+        printf ("Timeout reading bluetooth socket\n");
       (*rr) = 0;
       memset (received, 0, 1024);
       return -1;
     }
   if (FD_ISSET ((*s), &readfds))
-    {				// did we receive anything within 5 seconds
-      bytes_read = recv ((*s), buf, header[1] - 3, 0);	//Read the length specified by header
+    {                           // did we receive anything within 5 seconds
+      bytes_read = recv ((*s), buf, header[1] - 3, 0);  //Read the length specified by header
     }
   else
     {
       if (verbose == 1)
-	printf ("Timeout reading bluetooth socket\n");
+        printf ("Timeout reading bluetooth socket\n");
       (*rr) = 0;
       memset (received, 0, 1024);
       return -1;
@@ -503,76 +503,76 @@ check_send_error (ConfType * conf, int *s, int *rr, unsigned char *received,
   if (bytes_read > 0)
     {
       if (debug == 1)
-	printf ("\nReceiving\n");
+        printf ("\nReceiving\n");
       if (debug == 1)
-	{
-	  printf ("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
-	  j = 12;
-	  for (i = 0; i < sizeof (header); i++)
-	    {
-	      if (j % 16 == 0)
-		printf ("\n    %08x: ", j);
-	      printf ("%02x ", header[i]);
-	      j++;
-	    }
-	  for (i = 0; i < bytes_read; i++)
-	    {
-	      if (j % 16 == 0)
-		printf ("\n    %08x: ", j);
-	      printf ("%02x ", buf[i]);
-	      j++;
-	    }
-	  printf (" rr=%d", (bytes_read + (*rr)));
-	  printf ("\n\n");
-	}
+        {
+          printf ("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
+          j = 12;
+          for (i = 0; i < sizeof (header); i++)
+            {
+              if (j % 16 == 0)
+                printf ("\n    %08x: ", j);
+              printf ("%02x ", header[i]);
+              j++;
+            }
+          for (i = 0; i < bytes_read; i++)
+            {
+              if (j % 16 == 0)
+                printf ("\n    %08x: ", j);
+              printf ("%02x ", buf[i]);
+              j++;
+            }
+          printf (" rr=%d", (bytes_read + (*rr)));
+          printf ("\n\n");
+        }
       if ((cc == bytes_read) && (memcmp (received, last_sent, cc) == 0))
-	{
-	  printf ("ERROR received what we sent!");
-	  getchar ();
-	  //Need to do something
-	}
+        {
+          printf ("ERROR received what we sent!");
+          getchar ();
+          //Need to do something
+        }
       if (buf[bytes_read - 1] == 0x7e)
-	(*terminated) = 1;
+        (*terminated) = 1;
       else
-	(*terminated) = 0;
+        (*terminated) = 0;
       for (i = 0; i < bytes_read; i++)
-	{			//start copy the rec buffer in to received
-	  if (buf[i] == 0x7d)
-	    {			//did we receive the escape char
-	      switch (buf[i + 1])
-		{		// act depending on the char after the escape char
+        {                       //start copy the rec buffer in to received
+          if (buf[i] == 0x7d)
+            {                   //did we receive the escape char
+              switch (buf[i + 1])
+                {               // act depending on the char after the escape char
 
-		case 0x5e:
-		  received[(*rr)] = 0x7e;
-		  break;
+                case 0x5e:
+                  received[(*rr)] = 0x7e;
+                  break;
 
-		case 0x5d:
-		  received[(*rr)] = 0x7d;
-		  break;
+                case 0x5d:
+                  received[(*rr)] = 0x7d;
+                  break;
 
-		default:
-		  received[(*rr)] = buf[i + 1] ^ 0x20;
-		  break;
-		}
-	      i++;
-	    }
-	  else
-	    {
-	      received[(*rr)] = buf[i];
-	    }
-	  if (debug == 1)
-	    printf ("%02x ", received[(*rr)]);
-	  (*rr)++;
-	}
+                default:
+                  received[(*rr)] = buf[i + 1] ^ 0x20;
+                  break;
+                }
+              i++;
+            }
+          else
+            {
+              received[(*rr)] = buf[i];
+            }
+          if (debug == 1)
+            printf ("%02x ", received[(*rr)]);
+          (*rr)++;
+        }
       fix_length_received (received, rr);
       if (debug == 1)
-	{
-	  printf ("\n");
-	  for (i = 0; i < (*rr); i++)
-	    printf ("%02x ", received[(i)]);
-	}
+        {
+          printf ("\n");
+          for (i = 0; i < (*rr); i++)
+            printf ("%02x ", received[(i)]);
+        }
       if (debug == 1)
-	printf ("\n\n");
+        printf ("\n\n");
       (*already_read) = 1;
     }
   return 0;
@@ -580,15 +580,15 @@ check_send_error (ConfType * conf, int *s, int *rr, unsigned char *received,
 
 int
 read_bluetooth (ConfType * conf, int *s, int *rr, unsigned char *received,
-		int cc, unsigned char *last_sent, int *terminated)
+                int cc, unsigned char *last_sent, int *terminated)
 {
   int bytes_read, i, j;
-  unsigned char buf[1024];	/*read buffer */
-  unsigned char header[3];	/*read buffer */
+  unsigned char buf[1024];      /*read buffer */
+  unsigned char header[3];      /*read buffer */
   struct timeval tv;
   fd_set readfds;
 
-  tv.tv_sec = conf->bt_timeout;	// set timeout of reading
+  tv.tv_sec = conf->bt_timeout; // set timeout of reading
   tv.tv_usec = 0;
   memset (buf, 0, 1024);
 
@@ -597,36 +597,36 @@ read_bluetooth (ConfType * conf, int *s, int *rr, unsigned char *received,
 
   select ((*s) + 1, &readfds, NULL, NULL, &tv);
 
-  (*terminated) = 0;		// Tag to tell if string has 7e termination
+  (*terminated) = 0;            // Tag to tell if string has 7e termination
   // first read the header to get the record length
   if (FD_ISSET ((*s), &readfds))
-    {				// did we receive anything within 5 seconds
-      bytes_read = recv ((*s), header, sizeof (header), 0);	//Get length of string
+    {                           // did we receive anything within 5 seconds
+      bytes_read = recv ((*s), header, sizeof (header), 0);     //Get length of string
       (*rr) = 0;
       for (i = 0; i < sizeof (header); i++)
-	{
-	  received[(*rr)] = header[i];
-	  if (debug == 2)
-	    printf ("%02x ", received[i]);
-	  (*rr)++;
-	}
+        {
+          received[(*rr)] = header[i];
+          if (debug == 2)
+            printf ("%02x ", received[i]);
+          (*rr)++;
+        }
     }
   else
     {
       if (verbose == 1)
-	printf ("Timeout reading bluetooth socket\n");
+        printf ("Timeout reading bluetooth socket\n");
       (*rr) = 0;
       memset (received, 0, 1024);
       return -1;
     }
   if (FD_ISSET ((*s), &readfds))
-    {				// did we receive anything within 5 seconds
-      bytes_read = recv ((*s), buf, header[1] - 3, 0);	//Read the length specified by header
+    {                           // did we receive anything within 5 seconds
+      bytes_read = recv ((*s), buf, header[1] - 3, 0);  //Read the length specified by header
     }
   else
     {
       if (verbose == 1)
-	printf ("Timeout reading bluetooth socket\n");
+        printf ("Timeout reading bluetooth socket\n");
       (*rr) = 0;
       memset (received, 0, 1024);
       return -1;
@@ -634,76 +634,76 @@ read_bluetooth (ConfType * conf, int *s, int *rr, unsigned char *received,
   if (bytes_read > 0)
     {
       if (debug == 1)
-	printf ("\nReceiving\n");
+        printf ("\nReceiving\n");
       if (debug == 1)
-	{
-	  printf ("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
-	  j = 12;
-	  for (i = 0; i < sizeof (header); i++)
-	    {
-	      if (j % 16 == 0)
-		printf ("\n    %08x: ", j);
-	      printf ("%02x ", header[i]);
-	      j++;
-	    }
-	  for (i = 0; i < bytes_read; i++)
-	    {
-	      if (j % 16 == 0)
-		printf ("\n    %08x: ", j);
-	      printf ("%02x ", buf[i]);
-	      j++;
-	    }
-	  printf (" rr=%d", (bytes_read + (*rr)));
-	  printf ("\n\n");
-	}
+        {
+          printf ("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
+          j = 12;
+          for (i = 0; i < sizeof (header); i++)
+            {
+              if (j % 16 == 0)
+                printf ("\n    %08x: ", j);
+              printf ("%02x ", header[i]);
+              j++;
+            }
+          for (i = 0; i < bytes_read; i++)
+            {
+              if (j % 16 == 0)
+                printf ("\n    %08x: ", j);
+              printf ("%02x ", buf[i]);
+              j++;
+            }
+          printf (" rr=%d", (bytes_read + (*rr)));
+          printf ("\n\n");
+        }
       if ((cc == bytes_read) && (memcmp (received, last_sent, cc) == 0))
-	{
-	  printf ("ERROR received what we sent!");
-	  getchar ();
-	  //Need to do something
-	}
+        {
+          printf ("ERROR received what we sent!");
+          getchar ();
+          //Need to do something
+        }
       if (buf[bytes_read - 1] == 0x7e)
-	(*terminated) = 1;
+        (*terminated) = 1;
       else
-	(*terminated) = 0;
+        (*terminated) = 0;
       for (i = 0; i < bytes_read; i++)
-	{			//start copy the rec buffer in to received
-	  if (buf[i] == 0x7d)
-	    {			//did we receive the escape char
-	      switch (buf[i + 1])
-		{		// act depending on the char after the escape char
+        {                       //start copy the rec buffer in to received
+          if (buf[i] == 0x7d)
+            {                   //did we receive the escape char
+              switch (buf[i + 1])
+                {               // act depending on the char after the escape char
 
-		case 0x5e:
-		  received[(*rr)] = 0x7e;
-		  break;
+                case 0x5e:
+                  received[(*rr)] = 0x7e;
+                  break;
 
-		case 0x5d:
-		  received[(*rr)] = 0x7d;
-		  break;
+                case 0x5d:
+                  received[(*rr)] = 0x7d;
+                  break;
 
-		default:
-		  received[(*rr)] = buf[i + 1] ^ 0x20;
-		  break;
-		}
-	      i++;
-	    }
-	  else
-	    {
-	      received[(*rr)] = buf[i];
-	    }
-	  if (debug == 2)
-	    printf ("%02x ", received[(*rr)]);
-	  (*rr)++;
-	}
+                default:
+                  received[(*rr)] = buf[i + 1] ^ 0x20;
+                  break;
+                }
+              i++;
+            }
+          else
+            {
+              received[(*rr)] = buf[i];
+            }
+          if (debug == 2)
+            printf ("%02x ", received[(*rr)]);
+          (*rr)++;
+        }
       fix_length_received (received, rr);
       if (debug == 2)
-	{
-	  printf ("\n");
-	  for (i = 0; i < (*rr); i++)
-	    printf ("%02x ", received[(i)]);
-	}
+        {
+          printf ("\n");
+          for (i = 0; i < (*rr); i++)
+            printf ("%02x ", received[(i)]);
+        }
       if (debug == 1)
-	printf ("\n\n");
+        printf ("\n\n");
     }
   return 0;
 }
@@ -716,7 +716,7 @@ select_str (char *s)
     {
       //printf( "\ni=%d accepted=%s string=%s", i, accepted_strings[i], s );
       if (!strcmp (s, accepted_strings[i]))
-	return i;
+        return i;
     }
   return -1;
 }
@@ -734,7 +734,7 @@ get_timezone_in_seconds (unsigned char *tzhex)
   int tzsecs;
 
   returntime = (char *) malloc (6 * sizeof (char));
-  curtime = time (NULL);	//get time in seconds since epoch (1/1/1970)  
+  curtime = time (NULL);        //get time in seconds since epoch (1/1/1970)  
   loctime = localtime (&curtime);
   day = loctime->tm_mday;
   month = loctime->tm_mon + 1;
@@ -793,7 +793,7 @@ sunrise (float latitude, float longitude)
   double pi = M_PI;
 
   returntime = (char *) malloc (6 * sizeof (char));
-  curtime = time (NULL);	//get time in seconds since epoch (1/1/1970)  
+  curtime = time (NULL);        //get time in seconds since epoch (1/1/1970)  
   loctime = localtime (&curtime);
   day = loctime->tm_mday;
   month = loctime->tm_mon + 1;
@@ -848,7 +848,7 @@ sunrise (float latitude, float longitude)
   cosH =
     (cos ((pi / 180) * zenith) -
      (sinDec * sin ((pi / 180) * latitude))) / (cosDec * cos ((pi / 180) *
-							      latitude));
+                                                              latitude));
 
   if (cosH > 1)
     printf ("Sun never rises here!\n");
@@ -879,7 +879,7 @@ sunrise (float latitude, float longitude)
   if (localT > 24)
     localT = localT - 24;
   sprintf (returntime, "%02.0f:%02.0f", floor (localT),
-	   floor ((localT - floor (localT)) * 60));
+           floor ((localT - floor (localT)) * 60));
   return returntime;
 }
 
@@ -900,7 +900,7 @@ sunset (float latitude, float longitude)
 
   returntime = (char *) malloc (6 * sizeof (char));
 
-  curtime = time (NULL);	//get time in seconds since epoch (1/1/1970)  
+  curtime = time (NULL);        //get time in seconds since epoch (1/1/1970)  
   loctime = localtime (&curtime);
   day = loctime->tm_mday;
   month = loctime->tm_mon + 1;
@@ -946,7 +946,7 @@ sunset (float latitude, float longitude)
   cosH =
     (cos ((pi / 180) * zenith) -
      (sinDec * sin ((pi / 180) * latitude))) / (cosDec * cos ((pi / 180) *
-							      latitude));
+                                                              latitude));
 
   if (cosH > 1);
   //the sun never rises on this location (on the specified date)
@@ -970,7 +970,7 @@ sunset (float latitude, float longitude)
   if (localT > 24)
     localT = localT - 24;
   sprintf (returntime, "%02.0f:%02.0f", floor (localT),
-	   floor ((localT - floor (localT)) * 60));
+           floor ((localT - floor (localT)) * 60));
   return returntime;
 }
 
@@ -1060,7 +1060,7 @@ SetInverterType (ConfType * conf)
 //Convert a recieved string to a value
 long
 ConvertStreamtoLong (unsigned char *stream, int length,
-		     long unsigned int *value)
+                     long unsigned int *value)
 {
   int i, nullvalue;
 
@@ -1069,12 +1069,12 @@ ConvertStreamtoLong (unsigned char *stream, int length,
 
   for (i = 0; i < length; i++)
     {
-      if (stream[i] != 0xff)	//check if all ffs which is a null value 
-	nullvalue = 0;
+      if (stream[i] != 0xff)    //check if all ffs which is a null value 
+        nullvalue = 0;
       (*value) = (*value) + stream[i] * pow (256, i);
     }
   if (nullvalue == 1)
-    (*value) = 0;		//Asigning null to 0 at this stage unless it breaks something
+    (*value) = 0;               //Asigning null to 0 at this stage unless it breaks something
   return (*value);
 }
 
@@ -1089,19 +1089,19 @@ ConvertStreamtoFloat (unsigned char *stream, int length, float *value)
 
   for (i = 0; i < length; i++)
     {
-      if (stream[i] != 0xff)	//check if all ffs which is a null value 
-	nullvalue = 0;
+      if (stream[i] != 0xff)    //check if all ffs which is a null value 
+        nullvalue = 0;
       (*value) = (*value) + stream[i] * pow (256, i);
     }
   if (nullvalue == 1)
-    (*value) = 0;		//Asigning null to 0 at this stage unless it breaks something
+    (*value) = 0;               //Asigning null to 0 at this stage unless it breaks something
   return (*value);
 }
 
 //read return value data from init file
 ReturnType *
 InitReturnKeys (ConfType * conf, ReturnType * returnkeylist,
-		int *num_return_keys)
+                int *num_return_keys)
 {
   FILE *fp;
   char line[400];
@@ -1115,71 +1115,71 @@ InitReturnKeys (ConfType * conf, ReturnType * returnkeylist,
   while (!feof (fp))
     {
       if (fgets (line, 400, fp) != NULL)
-	{			//read line from smatool.conf
-	  if (line[0] != '#')
-	    {
-	      if (strncmp (line, ":unit conversions", 17) == 0)
-		data_follows = 1;
-	      if (strncmp (line, ":end unit conversions", 21) == 0)
-		data_follows = 0;
-	      if (data_follows == 1)
-		{
-		  tmp.key1 = 0x0;
-		  tmp.key2 = 0x0;
-		  strcpy (tmp.description, "");	//Null out value
-		  strcpy (tmp.units, "");	//Null out value
-		  tmp.divisor = 0;
-		  reading = 0;
-		  if (sscanf (line, "%x %x", &tmp.key1, &tmp.key2) == 2)
-		    {
-		      j = 0;
-		      for (i = 6; line[i] != '\0'; i++)
-			{
-			  if ((line[i] == '"') && (reading == 1))
-			    {
-			      tmp.description[j] = '\0';
-			      break;
-			    }
-			  if (reading == 1)
-			    {
-			      tmp.description[j] = line[i];
-			      j++;
-			    }
+        {                       //read line from smatool.conf
+          if (line[0] != '#')
+            {
+              if (strncmp (line, ":unit conversions", 17) == 0)
+                data_follows = 1;
+              if (strncmp (line, ":end unit conversions", 21) == 0)
+                data_follows = 0;
+              if (data_follows == 1)
+                {
+                  tmp.key1 = 0x0;
+                  tmp.key2 = 0x0;
+                  strcpy (tmp.description, ""); //Null out value
+                  strcpy (tmp.units, "");       //Null out value
+                  tmp.divisor = 0;
+                  reading = 0;
+                  if (sscanf (line, "%x %x", &tmp.key1, &tmp.key2) == 2)
+                    {
+                      j = 0;
+                      for (i = 6; line[i] != '\0'; i++)
+                        {
+                          if ((line[i] == '"') && (reading == 1))
+                            {
+                              tmp.description[j] = '\0';
+                              break;
+                            }
+                          if (reading == 1)
+                            {
+                              tmp.description[j] = line[i];
+                              j++;
+                            }
 
-			  if ((line[i] == '"') && (reading == 0))
-			    reading = 1;
-			}
-		      if (sscanf
-			  (line + i + 1, "%s %f", tmp.units,
-			   &tmp.divisor) == 2)
-			{
+                          if ((line[i] == '"') && (reading == 0))
+                            reading = 1;
+                        }
+                      if (sscanf
+                          (line + i + 1, "%s %f", tmp.units,
+                           &tmp.divisor) == 2)
+                        {
 
-			  if ((*num_return_keys) == 0)
-			    returnkeylist =
-			      (ReturnType *) malloc (sizeof (ReturnType));
-			  else
-			    returnkeylist =
-			      (ReturnType *) realloc (returnkeylist,
-						      sizeof (ReturnType) *
-						      ((*num_return_keys) +
-						       1));
-			  (returnkeylist + (*num_return_keys))->key1 =
-			    tmp.key1;
-			  (returnkeylist + (*num_return_keys))->key2 =
-			    tmp.key2;
-			  strcpy ((returnkeylist +
-				   (*num_return_keys))->description,
-				  tmp.description);
-			  strcpy ((returnkeylist + (*num_return_keys))->units,
-				  tmp.units);
-			  (returnkeylist + (*num_return_keys))->divisor =
-			    tmp.divisor;
-			  (*num_return_keys)++;
-			}
-		    }
-		}
-	    }
-	}
+                          if ((*num_return_keys) == 0)
+                            returnkeylist =
+                              (ReturnType *) malloc (sizeof (ReturnType));
+                          else
+                            returnkeylist =
+                              (ReturnType *) realloc (returnkeylist,
+                                                      sizeof (ReturnType) *
+                                                      ((*num_return_keys) +
+                                                       1));
+                          (returnkeylist + (*num_return_keys))->key1 =
+                            tmp.key1;
+                          (returnkeylist + (*num_return_keys))->key2 =
+                            tmp.key2;
+                          strcpy ((returnkeylist +
+                                   (*num_return_keys))->description,
+                                  tmp.description);
+                          strcpy ((returnkeylist + (*num_return_keys))->units,
+                                  tmp.units);
+                          (returnkeylist + (*num_return_keys))->divisor =
+                            tmp.divisor;
+                          (*num_return_keys)++;
+                        }
+                    }
+                }
+            }
+        }
     }
   fclose (fp);
 
@@ -1197,12 +1197,12 @@ ConvertStreamtoInt (unsigned char *stream, int length, int *value)
 
   for (i = 0; i < length; i++)
     {
-      if (stream[i] != 0xff)	//check if all ffs which is a null value 
-	nullvalue = 0;
+      if (stream[i] != 0xff)    //check if all ffs which is a null value 
+        nullvalue = 0;
       (*value) = (*value) + stream[i] * pow (256, i);
     }
   if (nullvalue == 1)
-    (*value) = 0;		//Asigning null to 0 at this stage unless it breaks something
+    (*value) = 0;               //Asigning null to 0 at this stage unless it breaks something
   return (*value);
 }
 
@@ -1217,19 +1217,19 @@ ConvertStreamtoTime (unsigned char *stream, int length, time_t * value)
 
   for (i = 0; i < length; i++)
     {
-      if (stream[i] != 0xff)	//check if all ffs which is a null value 
-	nullvalue = 0;
+      if (stream[i] != 0xff)    //check if all ffs which is a null value 
+        nullvalue = 0;
       (*value) = (*value) + stream[i] * pow (256, i);
     }
   if (nullvalue == 1)
-    (*value) = 0;		//Asigning null to 0 at this stage unless it breaks something
+    (*value) = 0;               //Asigning null to 0 at this stage unless it breaks something
   return (*value);
 }
 
 // Set switches to save lots of strcmps
 void
 SetSwitches (ConfType * conf, char *datefrom, char *dateto, int *location,
-	     int *mysql, int *post, int *file, int *daterange, int *test)
+             int *mysql, int *post, int *file, int *daterange, int *test)
 {
   //Check if all location variables are set
   if ((conf->latitude_f <= 180) && (conf->longitude_f <= 180))
@@ -1263,8 +1263,8 @@ SetSwitches (ConfType * conf, char *datefrom, char *dateto, int *location,
 
 unsigned char *
 ReadStream (ConfType * conf, int *s, unsigned char *stream, int *streamlen,
-	    unsigned char *datalist, int *datalen, unsigned char *last_sent,
-	    int cc, int *terminated, int *togo)
+            unsigned char *datalist, int *datalen, unsigned char *last_sent,
+            int cc, int *terminated, int *togo)
 {
   int finished;
   int finished_record;
@@ -1273,7 +1273,7 @@ ReadStream (ConfType * conf, int *s, unsigned char *stream, int *streamlen,
   (*togo) = ConvertStreamtoInt (stream + 43, 2, togo);
   if (debug == 1)
     printf ("togo=%d\n", (*togo));
-  i = 59;			//Initial position of data stream
+  i = 59;                       //Initial position of data stream
   (*datalen) = 0;
   datalist = (unsigned char *) malloc (sizeof (char));
   finished = 0;
@@ -1281,41 +1281,41 @@ ReadStream (ConfType * conf, int *s, unsigned char *stream, int *streamlen,
   while (finished != 1)
     {
       datalist =
-	(unsigned char *) realloc (datalist,
-				   sizeof (char) * ((*datalen) +
-						    (*streamlen) - i));
+        (unsigned char *) realloc (datalist,
+                                   sizeof (char) * ((*datalen) +
+                                                    (*streamlen) - i));
       while (finished_record != 1)
-	{
-	  if (i > 500)
-	    break;		//Somthing has gone wrong
+        {
+          if (i > 500)
+            break;              //Somthing has gone wrong
 
-	  if ((i < (*streamlen))
-	      && (((*terminated) != 1) || (i + 3 < (*streamlen))))
-	    {
-	      datalist[j] = stream[i];
-	      j++;
-	      (*datalen) = j;
-	      i++;
-	    }
-	  else
-	    finished_record = 1;
+          if ((i < (*streamlen))
+              && (((*terminated) != 1) || (i + 3 < (*streamlen))))
+            {
+              datalist[j] = stream[i];
+              j++;
+              (*datalen) = j;
+              i++;
+            }
+          else
+            finished_record = 1;
 
-	}
+        }
       finished_record = 0;
       if ((*terminated) == 0)
-	{
-	  read_bluetooth (conf, s, streamlen, stream, cc, last_sent,
-			  terminated);
-	  i = 18;
-	}
+        {
+          read_bluetooth (conf, s, streamlen, stream, cc, last_sent,
+                          terminated);
+          i = 18;
+        }
       else
-	finished = 1;
+        finished = 1;
     }
   if (debug == 1)
     {
       printf ("len=%d data=", (*datalen));
       for (i = 0; i < (*datalen); i++)
-	printf ("%02x ", datalist[i]);
+        printf ("%02x ", datalist[i]);
       printf ("\n");
     }
   return datalist;
@@ -1362,62 +1362,62 @@ GetConfig (ConfType * conf)
   if (strlen (conf->Config) > 0)
     {
       if ((fp = fopen (conf->Config, "r")) == (FILE *) NULL)
-	{
-	  printf ("Error! Could not open file %s\n", conf->Config);
-	  return (-1);		//Could not open file
-	}
+        {
+          printf ("Error! Could not open file %s\n", conf->Config);
+          return (-1);          //Could not open file
+        }
     }
   else
     {
       if ((fp = fopen ("./smatool.conf", "r")) == (FILE *) NULL)
-	{
-	  printf ("Error! Could not open file ./smatool.conf\n");
-	  return (-1);		//Could not open file
-	}
+        {
+          printf ("Error! Could not open file ./smatool.conf\n");
+          return (-1);          //Could not open file
+        }
     }
   while (!feof (fp))
     {
       if (fgets (line, 400, fp) != NULL)
-	{			//read line from smatool.conf
-	  if (line[0] != '#')
-	    {
-	      strcpy (value, "");	//Null out value
-	      sscanf (line, "%s %s", variable, value);
-	      if (debug == 1)
-		printf ("variable=%s value=%s\n", variable, value);
-	      if (value[0] != '\0')
-		{
-		  if (strcmp (variable, "Inverter") == 0)
-		    strcpy (conf->Inverter, value);
-		  if (strcmp (variable, "BTAddress") == 0)
-		    strcpy (conf->BTAddress, value);
-		  if (strcmp (variable, "BTTimeout") == 0)
-		    conf->bt_timeout = atoi (value);
-		  if (strcmp (variable, "Password") == 0)
-		    strcpy (conf->Password, value);
-		  if (strcmp (variable, "File") == 0)
-		    strcpy (conf->File, value);
-		  if (strcmp (variable, "Latitude") == 0)
-		    conf->latitude_f = atof (value);
-		  if (strcmp (variable, "Longitude") == 0)
-		    conf->longitude_f = atof (value);
-		  if (strcmp (variable, "MySqlHost") == 0)
-		    strcpy (conf->MySqlHost, value);
-		  if (strcmp (variable, "MySqlDatabase") == 0)
-		    strcpy (conf->MySqlDatabase, value);
-		  if (strcmp (variable, "MySqlUser") == 0)
-		    strcpy (conf->MySqlUser, value);
-		  if (strcmp (variable, "MySqlPwd") == 0)
-		    strcpy (conf->MySqlPwd, value);
-		  if (strcmp (variable, "PVOutputURL") == 0)
-		    strcpy (conf->PVOutputURL, value);
-		  if (strcmp (variable, "PVOutputKey") == 0)
-		    strcpy (conf->PVOutputKey, value);
-		  if (strcmp (variable, "PVOutputSid") == 0)
-		    strcpy (conf->PVOutputSid, value);
-		}
-	    }
-	}
+        {                       //read line from smatool.conf
+          if (line[0] != '#')
+            {
+              strcpy (value, "");       //Null out value
+              sscanf (line, "%s %s", variable, value);
+              if (debug == 1)
+                printf ("variable=%s value=%s\n", variable, value);
+              if (value[0] != '\0')
+                {
+                  if (strcmp (variable, "Inverter") == 0)
+                    strcpy (conf->Inverter, value);
+                  if (strcmp (variable, "BTAddress") == 0)
+                    strcpy (conf->BTAddress, value);
+                  if (strcmp (variable, "BTTimeout") == 0)
+                    conf->bt_timeout = atoi (value);
+                  if (strcmp (variable, "Password") == 0)
+                    strcpy (conf->Password, value);
+                  if (strcmp (variable, "File") == 0)
+                    strcpy (conf->File, value);
+                  if (strcmp (variable, "Latitude") == 0)
+                    conf->latitude_f = atof (value);
+                  if (strcmp (variable, "Longitude") == 0)
+                    conf->longitude_f = atof (value);
+                  if (strcmp (variable, "MySqlHost") == 0)
+                    strcpy (conf->MySqlHost, value);
+                  if (strcmp (variable, "MySqlDatabase") == 0)
+                    strcpy (conf->MySqlDatabase, value);
+                  if (strcmp (variable, "MySqlUser") == 0)
+                    strcpy (conf->MySqlUser, value);
+                  if (strcmp (variable, "MySqlPwd") == 0)
+                    strcpy (conf->MySqlPwd, value);
+                  if (strcmp (variable, "PVOutputURL") == 0)
+                    strcpy (conf->PVOutputURL, value);
+                  if (strcmp (variable, "PVOutputKey") == 0)
+                    strcpy (conf->PVOutputKey, value);
+                  if (strcmp (variable, "PVOutputSid") == 0)
+                    strcpy (conf->PVOutputSid, value);
+                }
+            }
+        }
     }
   fclose (fp);
   return (0);
@@ -1436,53 +1436,53 @@ GetInverterSetting (ConfType * conf)
   if (strlen (conf->Setting) > 0)
     {
       if ((fp = fopen (conf->Setting, "r")) == (FILE *) NULL)
-	{
-	  printf ("Error! Could not open file %s\n", conf->Setting);
-	  return (-1);		//Could not open file
-	}
+        {
+          printf ("Error! Could not open file %s\n", conf->Setting);
+          return (-1);          //Could not open file
+        }
     }
   else
     {
       if ((fp = fopen ("./invcode.in", "r")) == (FILE *) NULL)
-	{
-	  printf ("Error! Could not open file ./invcode.in\n");
-	  return (-1);		//Could not open file
-	}
+        {
+          printf ("Error! Could not open file ./invcode.in\n");
+          return (-1);          //Could not open file
+        }
     }
   while (!feof (fp))
     {
       if (fgets (line, 400, fp) != NULL)
-	{			//read line from smatool.conf
-	  if (line[0] != '#')
-	    {
-	      strcpy (value, "");	//Null out value
-	      sscanf (line, "%s %s", variable, value);
-	      if (debug == 1)
-		printf ("variable=%s value=%s\n", variable, value);
-	      if (value[0] != '\0')
-		{
-		  if (strcmp (variable, "Inverter") == 0)
-		    {
-		      if (strcmp (value, conf->Inverter) == 0)
-			found_inverter = 1;
-		      else
-			found_inverter = 0;
-		    }
-		  if ((strcmp (variable, "Code1") == 0) && found_inverter)
-		    {
-		      sscanf (value, "%X", &conf->InverterCode[0]);
-		    }
-		  if ((strcmp (variable, "Code2") == 0) && found_inverter)
-		    sscanf (value, "%X", &conf->InverterCode[1]);
-		  if ((strcmp (variable, "Code3") == 0) && found_inverter)
-		    sscanf (value, "%X", &conf->InverterCode[2]);
-		  if ((strcmp (variable, "Code4") == 0) && found_inverter)
-		    sscanf (value, "%X", &conf->InverterCode[3]);
-		  if ((strcmp (variable, "InvCode") == 0) && found_inverter)
-		    sscanf (value, "%X", &conf->ArchiveCode);
-		}
-	    }
-	}
+        {                       //read line from smatool.conf
+          if (line[0] != '#')
+            {
+              strcpy (value, "");       //Null out value
+              sscanf (line, "%s %s", variable, value);
+              if (debug == 1)
+                printf ("variable=%s value=%s\n", variable, value);
+              if (value[0] != '\0')
+                {
+                  if (strcmp (variable, "Inverter") == 0)
+                    {
+                      if (strcmp (value, conf->Inverter) == 0)
+                        found_inverter = 1;
+                      else
+                        found_inverter = 0;
+                    }
+                  if ((strcmp (variable, "Code1") == 0) && found_inverter)
+                    {
+                      sscanf (value, "%X", &conf->InverterCode[0]);
+                    }
+                  if ((strcmp (variable, "Code2") == 0) && found_inverter)
+                    sscanf (value, "%X", &conf->InverterCode[1]);
+                  if ((strcmp (variable, "Code3") == 0) && found_inverter)
+                    sscanf (value, "%X", &conf->InverterCode[2]);
+                  if ((strcmp (variable, "Code4") == 0) && found_inverter)
+                    sscanf (value, "%X", &conf->InverterCode[3]);
+                  if ((strcmp (variable, "InvCode") == 0) && found_inverter)
+                    sscanf (value, "%X", &conf->ArchiveCode);
+                }
+            }
+        }
     }
   fclose (fp);
   if ((conf->InverterCode[0] == 0) ||
@@ -1561,200 +1561,200 @@ PrintHelp ()
 /* Init Config to default values */
 int
 ReadCommandConfig (ConfType * conf, int argc, char **argv, char *datefrom,
-		   char *dateto, int *verbose, int *debug, int *repost,
-		   int *test, int *install, int *update)
+                   char *dateto, int *verbose, int *debug, int *repost,
+                   int *test, int *install, int *update)
 {
   int i;
 
   // these need validation checking at some stage TODO
-  for (i = 1; i < argc; i++)	//Read through passed arguments
+  for (i = 1; i < argc; i++)    //Read through passed arguments
     {
       if ((strcmp (argv[i], "-v") == 0)
-	  || (strcmp (argv[i], "--verbose") == 0))
-	(*verbose) = 1;
+          || (strcmp (argv[i], "--verbose") == 0))
+        (*verbose) = 1;
       else if ((strcmp (argv[i], "-d") == 0)
-	       || (strcmp (argv[i], "--debug") == 0))
-	(*debug) = 1;
+               || (strcmp (argv[i], "--debug") == 0))
+        (*debug) = 1;
       else if ((strcmp (argv[i], "-c") == 0)
-	       || (strcmp (argv[i], "--config") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->Config, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--config") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->Config, argv[i]);
+            }
+        }
       else if (strcmp (argv[i], "--test") == 0)
-	(*test) = 1;
+        (*test) = 1;
       else if ((strcmp (argv[i], "-from") == 0)
-	       || (strcmp (argv[i], "--datefrom") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (datefrom, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--datefrom") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (datefrom, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-to") == 0)
-	       || (strcmp (argv[i], "--dateto") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (dateto, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--dateto") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (dateto, argv[i]);
+            }
+        }
       else if (strcmp (argv[i], "-repost") == 0)
-	{
-	  i++;
-	  (*repost) = 1;
-	}
+        {
+          i++;
+          (*repost) = 1;
+        }
       else if ((strcmp (argv[i], "-i") == 0)
-	       || (strcmp (argv[i], "--inverter") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->Inverter, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--inverter") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->Inverter, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-a") == 0)
-	       || (strcmp (argv[i], "--address") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->BTAddress, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--address") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->BTAddress, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-t") == 0)
-	       || (strcmp (argv[i], "--timeout") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      conf->bt_timeout = atoi (argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--timeout") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              conf->bt_timeout = atoi (argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-p") == 0)
-	       || (strcmp (argv[i], "--password") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->Password, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--password") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->Password, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-f") == 0)
-	       || (strcmp (argv[i], "--file") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->File, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--file") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->File, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-lat") == 0)
-	       || (strcmp (argv[i], "--latitude") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      conf->latitude_f = atof (argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--latitude") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              conf->latitude_f = atof (argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-long") == 0)
-	       || (strcmp (argv[i], "--longitude") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      conf->longitude_f = atof (argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--longitude") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              conf->longitude_f = atof (argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-H") == 0)
-	       || (strcmp (argv[i], "--mysqlhost") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->MySqlHost, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--mysqlhost") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->MySqlHost, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-D") == 0)
-	       || (strcmp (argv[i], "--mysqlcwdb") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->MySqlDatabase, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--mysqlcwdb") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->MySqlDatabase, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-U") == 0)
-	       || (strcmp (argv[i], "--mysqluser") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->MySqlUser, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--mysqluser") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->MySqlUser, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-P") == 0)
-	       || (strcmp (argv[i], "--mysqlpwd") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->MySqlPwd, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--mysqlpwd") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->MySqlPwd, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-url") == 0)
-	       || (strcmp (argv[i], "--pvouturl") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->PVOutputURL, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--pvouturl") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->PVOutputURL, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-key") == 0)
-	       || (strcmp (argv[i], "--pvoutkey") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->PVOutputKey, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--pvoutkey") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->PVOutputKey, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-sid") == 0)
-	       || (strcmp (argv[i], "--pvoutsid") == 0))
-	{
-	  i++;
-	  if (i < argc)
-	    {
-	      strcpy (conf->PVOutputSid, argv[i]);
-	    }
-	}
+               || (strcmp (argv[i], "--pvoutsid") == 0))
+        {
+          i++;
+          if (i < argc)
+            {
+              strcpy (conf->PVOutputSid, argv[i]);
+            }
+        }
       else if ((strcmp (argv[i], "-h") == 0)
-	       || (strcmp (argv[i], "--help") == 0))
-	{
-	  PrintHelp ();
-	  return (-1);
-	}
+               || (strcmp (argv[i], "--help") == 0))
+        {
+          PrintHelp ();
+          return (-1);
+        }
       else if (strcmp (argv[i], "--INSTALL") == 0)
-	(*install) = 1;
+        (*install) = 1;
       else if (strcmp (argv[i], "--UPDATE") == 0)
-	(*update) = 1;
+        (*update) = 1;
       else
-	{
-	  printf ("Bad Syntax\n\n");
-	  for (i = 0; i < argc; i++)
-	    printf ("%s ", argv[i]);
-	  printf ("\n\n");
+        {
+          printf ("Bad Syntax\n\n");
+          for (i = 0; i < argc; i++)
+            printf ("%s ", argv[i]);
+          printf ("\n\n");
 
-	  PrintHelp ();
-	  return (-1);
-	}
+          PrintHelp ();
+          return (-1);
+        }
     }
   return (0);
 }
@@ -1775,11 +1775,11 @@ debugdate ()
   struct tm *tm;
   static char result[20];
 
-  curtime = time (NULL);	//get time in seconds since epoch (1/1/1970) 
+  curtime = time (NULL);        //get time in seconds since epoch (1/1/1970) 
   tm = localtime (&curtime);
   sprintf (result, "%4d-%02d-%02d %02d:%02d:%02d",
-	   1900 + tm->tm_year,
-	   1 + tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+           1900 + tm->tm_year,
+           1 + tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
   return result;
 }
 
@@ -1811,7 +1811,7 @@ main (int argc, char **argv)
   int initstarted = 0, setupstarted = 0, rangedatastarted = 0;
   long returnpos;
   int returnline;
-  char compurl[400];		//seg error on curl fix 2012.01.14
+  char compurl[400];            //seg error on curl fix 2012.01.14
   char datefrom[100];
   char dateto[100];
   int pass_i;
@@ -1861,7 +1861,7 @@ main (int argc, char **argv)
   memset (received, 0, 1024);
   last_sent = (unsigned char *) malloc (sizeof (unsigned char));
   /* get the report time - used in various places */
-  reporttime = time (NULL);	//get time in seconds since epoch (1/1/1970)  
+  reporttime = time (NULL);     //get time in seconds since epoch (1/1/1970)  
 
   // set config to defaults
   InitConfig (&conf, datefrom, dateto);
@@ -1883,7 +1883,7 @@ main (int argc, char **argv)
     exit (-1);
   // set switches used through the program
   SetSwitches (&conf, datefrom, dateto, &location, &mysql, &post, &file,
-	       &daterange, &test);
+               &daterange, &test);
   // Set value for inverter type
   //SetInverterType( &conf );
   // Get Return Value lookup from file
@@ -1896,40 +1896,40 @@ main (int argc, char **argv)
   if ((daterange == 1) && ((location = 0) || (mysql == 0)))
     {
       if (verbose == 1)
-	printf ("Address %s\n", conf.BTAddress);
+        printf ("Address %s\n", conf.BTAddress);
 
       if (file == 1)
-	fp = fopen (conf.File, "r");
+        fp = fopen (conf.File, "r");
       else
-	fp = fopen ("/etc/sma.in", "r");
+        fp = fopen ("/etc/sma.in", "r");
       for (i = 1; i < 20; i++)
-	{
-	  // allocate a socket
-	  s = socket (AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+        {
+          // allocate a socket
+          s = socket (AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
-	  // set the connection parameters (who to connect to)
-	  addr.rc_family = AF_BLUETOOTH;
-	  addr.rc_channel = (uint8_t) 1;
-	  str2ba (conf.BTAddress, &addr.rc_bdaddr);
+          // set the connection parameters (who to connect to)
+          addr.rc_family = AF_BLUETOOTH;
+          addr.rc_channel = (uint8_t) 1;
+          str2ba (conf.BTAddress, &addr.rc_bdaddr);
 
-	  // connect to server
-	  if (debug == 1)
-	    {
-	      printf ("datefrom=%s dateto=%s\n", datefrom, dateto);
-	    }
-	  status = connect (s, (struct sockaddr *) &addr, sizeof (addr));
-	  if (status < 0)
-	    {
-	      printf ("Error connecting to %s\n", conf.BTAddress);
-	      close (s);
-	    }
-	  else
-	    break;
-	}
+          // connect to server
+          if (debug == 1)
+            {
+              printf ("datefrom=%s dateto=%s\n", datefrom, dateto);
+            }
+          status = connect (s, (struct sockaddr *) &addr, sizeof (addr));
+          if (status < 0)
+            {
+              printf ("Error connecting to %s\n", conf.BTAddress);
+              close (s);
+            }
+          else
+            break;
+        }
       if (status < 0)
-	{
-	  return (-1);
-	}
+        {
+          return (-1);
+        }
 
       // convert address
       address[5] = conv (strtok (conf.BTAddress, ":"));
@@ -1940,886 +1940,882 @@ main (int argc, char **argv)
       address[0] = conv (strtok (NULL, ":"));
 
       while (!feof (fp))
-	{
-	start:
-	  if (fgets (line, 400, fp) != NULL)
-	    {			//read line from sma.in
-	      linenum++;
-	      lineread = strtok (line, " ;");
-	      if (!strcmp (lineread, "R"))
-		{		//See if line is something we need to receive
-		  if (debug == 1)
-		    printf ("[%d] %s Waiting for string\n", linenum,
-			    debugdate ());
-		  cc = 0;
-		  do
-		    {
-		      lineread = strtok (NULL, " ;");
-		      switch (select_str (lineread))
-			{
+        {
+        start:
+          if (fgets (line, 400, fp) != NULL)
+            {                   //read line from sma.in
+              linenum++;
+              lineread = strtok (line, " ;");
+              if (!strcmp (lineread, "R"))
+                {               //See if line is something we need to receive
+                  if (debug == 1)
+                    printf ("[%d] %s Waiting for string\n", linenum,
+                            debugdate ());
+                  cc = 0;
+                  do
+                    {
+                      lineread = strtok (NULL, " ;");
+                      switch (select_str (lineread))
+                        {
 
-			case 0:	// $END
-			  //do nothing
-			  break;
+                        case 0: // $END
+                          //do nothing
+                          break;
 
-			case 1:	// $ADDR
-			  for (i = 0; i < 6; i++)
-			    {
-			      fl[cc] = address[i];
-			      cc++;
-			    }
-			  break;
+                        case 1: // $ADDR
+                          for (i = 0; i < 6; i++)
+                            {
+                              fl[cc] = address[i];
+                              cc++;
+                            }
+                          break;
 
-			case 3:	// $SER
-			  for (i = 0; i < 4; i++)
-			    {
-			      fl[cc] = serial[i];
-			      cc++;
-			    }
-			  break;
+                        case 3: // $SER
+                          for (i = 0; i < 4; i++)
+                            {
+                              fl[cc] = serial[i];
+                              cc++;
+                            }
+                          break;
 
-			case 7:	// $ADD2
-			  for (i = 0; i < 6; i++)
-			    {
-			      fl[cc] = address2[i];
-			      cc++;
-			    }
-			  break;
+                        case 7: // $ADD2
+                          for (i = 0; i < 6; i++)
+                            {
+                              fl[cc] = address2[i];
+                              cc++;
+                            }
+                          break;
 
-			case 8:	// $CHAN
-			  fl[cc] = chan[0];
-			  cc++;
-			  break;
+                        case 8: // $CHAN
+                          fl[cc] = chan[0];
+                          cc++;
+                          break;
 
-			default:
-			  fl[cc] = conv (lineread);
-			  cc++;
-			}
+                        default:
+                          fl[cc] = conv (lineread);
+                          cc++;
+                        }
 
-		    }
-		  while (strcmp (lineread, "$END"));
-		  if (debug == 1)
-		    {
-		      printf ("[%d] %s waiting for: ", linenum, debugdate ());
-		      for (i = 0; i < cc; i++)
-			printf ("%02x ", fl[i]);
-		      printf ("\n\n");
-		    }
-		  if (debug == 1)
-		    printf ("[%d] %s Waiting for data on rfcomm\n", linenum,
-			    debugdate ());
-		  found = 0;
-		  do
-		    {
-		      if (already_read == 0)
-			rr = 0;
-		      if ((already_read == 0)
-			  &&
-			  (read_bluetooth
-			   (&conf, &s, &rr, received, cc, last_sent,
-			    &terminated) != 0))
-			{
-			  already_read = 0;
-			  fseek (fp, returnpos, 0);
-			  linenum = returnline;
-			  found = 0;
-			  if (archdatalen > 0)
-			    free (archdatalist);
-			  archdatalen = 0;
-			  strcpy (lineread, "");
-			  sleep (10);
-			  failedbluetooth++;
-			  if (failedbluetooth > 3)
-			    exit (-1);
-			  goto start;
-			}
-		      else
-			{
-			  already_read = 0;
-			  if (debug == 1)
-			    {
-			      printf ("[%d] %s looking for: ", linenum,
-				      debugdate ());
-			      for (i = 0; i < cc; i++)
-				printf ("%02x ", fl[i]);
-			      printf ("\n");
-			      printf ("[%d] %s received:    ", linenum,
-				      debugdate ());
-			      for (i = 0; i < rr; i++)
-				printf ("%02x ", received[i]);
-			      printf ("\n\n");
-			    }
+                    }
+                  while (strcmp (lineread, "$END"));
+                  if (debug == 1)
+                    {
+                      printf ("[%d] %s waiting for: ", linenum, debugdate ());
+                      for (i = 0; i < cc; i++)
+                        printf ("%02x ", fl[i]);
+                      printf ("\n\n");
+                    }
+                  if (debug == 1)
+                    printf ("[%d] %s Waiting for data on rfcomm\n", linenum,
+                            debugdate ());
+                  found = 0;
+                  do
+                    {
+                      if (already_read == 0)
+                        rr = 0;
+                      if ((already_read == 0)
+                          &&
+                          (read_bluetooth
+                           (&conf, &s, &rr, received, cc, last_sent,
+                            &terminated) != 0))
+                        {
+                          already_read = 0;
+                          fseek (fp, returnpos, 0);
+                          linenum = returnline;
+                          found = 0;
+                          if (archdatalen > 0)
+                            free (archdatalist);
+                          archdatalen = 0;
+                          strcpy (lineread, "");
+                          sleep (10);
+                          failedbluetooth++;
+                          if (failedbluetooth > 3)
+                            exit (-1);
+                          goto start;
+                        }
+                      else
+                        {
+                          already_read = 0;
+                          if (debug == 1)
+                            {
+                              printf ("[%d] %s looking for: ", linenum,
+                                      debugdate ());
+                              for (i = 0; i < cc; i++)
+                                printf ("%02x ", fl[i]);
+                              printf ("\n");
+                              printf ("[%d] %s received:    ", linenum,
+                                      debugdate ());
+                              for (i = 0; i < rr; i++)
+                                printf ("%02x ", received[i]);
+                              printf ("\n\n");
+                            }
 
-			  if (memcmp (fl + 4, received + 4, cc - 4) == 0)
-			    {
-			      found = 1;
-			      if (debug == 1)
-				printf
-				  ("[%d] %s Found string we are waiting for\n",
-				   linenum, debugdate ());
-			    }
-			  else
-			    {
-			      if (debug == 1)
-				printf ("[%d] %s Did not find string\n",
-					linenum, debugdate ());
-			    }
-			}
-		    }
-		  while (found == 0);
-		  if (debug == 2)
-		    {
-		      for (i = 0; i < cc; i++)
-			printf ("%02x ", fl[i]);
-		      printf ("\n\n");
-		    }
-		}
-	      if (!strcmp (lineread, "S"))
-		{		//See if line is something we need to send
-		  if (debug == 1)
-		    printf ("[%d] %s Sending\n", linenum, debugdate ());
-		  cc = 0;
-		  do
-		    {
-		      lineread = strtok (NULL, " ;");
-		      switch (select_str (lineread))
-			{
+                          if (memcmp (fl + 4, received + 4, cc - 4) == 0)
+                            {
+                              found = 1;
+                              if (debug == 1)
+                                printf
+                                  ("[%d] %s Found string we are waiting for\n",
+                                   linenum, debugdate ());
+                            }
+                          else
+                            {
+                              if (debug == 1)
+                                printf ("[%d] %s Did not find string\n",
+                                        linenum, debugdate ());
+                            }
+                        }
+                    }
+                  while (found == 0);
+                  if (debug == 2)
+                    {
+                      for (i = 0; i < cc; i++)
+                        printf ("%02x ", fl[i]);
+                      printf ("\n\n");
+                    }
+                }
+              if (!strcmp (lineread, "S"))
+                {               //See if line is something we need to send
+                  if (debug == 1)
+                    printf ("[%d] %s Sending\n", linenum, debugdate ());
+                  cc = 0;
+                  do
+                    {
+                      lineread = strtok (NULL, " ;");
+                      switch (select_str (lineread))
+                        {
 
-			case 0:	// $END
-			  //do nothing
-			  break;
+                        case 0: // $END
+                          //do nothing
+                          break;
 
-			case 1:	// $ADDR
-			  for (i = 0; i < 6; i++)
-			    {
-			      fl[cc] = address[i];
-			      cc++;
-			    }
-			  break;
+                        case 1: // $ADDR
+                          for (i = 0; i < 6; i++)
+                            {
+                              fl[cc] = address[i];
+                              cc++;
+                            }
+                          break;
 
-			case 3:	// $SER
-			  for (i = 0; i < 4; i++)
-			    {
-			      fl[cc] = serial[i];
-			      cc++;
-			    }
-			  break;
-
-
-			case 7:	// $ADD2
-			  for (i = 0; i < 6; i++)
-			    {
-			      fl[cc] = address2[i];
-			      cc++;
-			    }
-			  break;
-
-			case 2:	// $TIME    
-			  // get report time and convert
-			  sprintf (tt, "%x", (int) reporttime);	//convert to a hex in a string
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
-
-			case 11:	// $TMPLUS 
-			  // get report time and convert
-			  sprintf (tt, "%x", (int) reporttime + 1);	//convert to a hex in a string
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
+                        case 3: // $SER
+                          for (i = 0; i < 4; i++)
+                            {
+                              fl[cc] = serial[i];
+                              cc++;
+                            }
+                          break;
 
 
-			case 10:	// $TMMINUS
-			  // get report time and convert
-			  sprintf (tt, "%x", (int) reporttime - 1);	//convert to a hex in a string
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
+                        case 7: // $ADD2
+                          for (i = 0; i < 6; i++)
+                            {
+                              fl[cc] = address2[i];
+                              cc++;
+                            }
+                          break;
 
-			case 4:	//$crc
-			  tryfcs16 (fl + 19, cc - 19);
-			  add_escapes (fl, &cc);
-			  fix_length_send (fl, &cc);
-			  break;
+                        case 2: // $TIME    
+                          // get report time and convert
+                          sprintf (tt, "%x", (int) reporttime); //convert to a hex in a string
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			case 8:	// $CHAN
-			  fl[cc] = chan[0];
-			  cc++;
-			  break;
-
-			case 12:	// $TIMESTRING
-			  for (i = 0; i < 25; i++)
-			    {
-			      fl[cc] = timestr[i];
-			      cc++;
-			    }
-			  break;
-
-			case 13:	// $TIMEFROM1  
-			  // get report time and convert
-			  if (daterange == 1)
-			    {
-			      if (strptime
-				  (datefrom, "%Y-%m-%d %H:%M:%S", &tm) == 0)
-				{
-				  if (debug == 1)
-				    printf ("datefrom %s\n", datefrom);
-				  printf ("Time Coversion Error\n");
-				  error = 1;
-				  exit (-1);
-				}
-			      tm.tm_isdst = -1;
-			      fromtime = mktime (&tm);
-			      if (fromtime == -1)
-				{
-				  // Error we need to do something about it
-				  printf ("%03x", (int) fromtime);
-				  getchar ();
-				  printf ("\n%03x", (int) fromtime);
-				  getchar ();
-				  fromtime = 0;
-				  printf ("bad from");
-				  getchar ();
-				}
-			    }
-			  else
-			    {
-			      printf ("no from");
-			      getchar ();
-			      fromtime = 0;
-			    }
-			  sprintf (tt, "%03x", (int) fromtime - 300);	//convert to a hex in a string and start 5 mins before for dummy read.
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
-
-			case 14:	// $TIMETO1    
-			  if (daterange == 1)
-			    {
-			      if (strptime (dateto, "%Y-%m-%d %H:%M:%S", &tm)
-				  == 0)
-				{
-				  if (debug == 1)
-				    printf ("dateto %s\n", dateto);
-				  printf ("Time Coversion Error\n");
-				  error = 1;
-				  exit (-1);
-				}
-			      tm.tm_isdst = -1;
-			      totime = mktime (&tm);
-			      if (totime == -1)
-				{
-				  // Error we need to do something about it
-				  printf ("%03x", (int) totime);
-				  getchar ();
-				  printf ("\n%03x", (int) totime);
-				  getchar ();
-				  totime = 0;
-				  printf ("bad to");
-				  getchar ();
-				}
-			    }
-			  else
-			    totime = 0;
-			  sprintf (tt, "%03x", (int) totime);	//convert to a hex in a string
-			  // get report time and convert
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
-
-			case 15:	// $TIMEFROM2
-			  if (daterange == 1)
-			    {
-			      strptime (datefrom, "%Y-%m-%d %H:%M:%S", &tm);
-			      tm.tm_isdst = -1;
-			      fromtime = mktime (&tm) - 86400;
-			      if (fromtime == -1)
-				{
-				  // Error we need to do something about it
-				  printf ("%03x", (int) fromtime);
-				  getchar ();
-				  printf ("\n%03x", (int) fromtime);
-				  getchar ();
-				  fromtime = 0;
-				  printf ("bad from");
-				  getchar ();
-				}
-			    }
-			  else
-			    {
-			      printf ("no from");
-			      getchar ();
-			      fromtime = 0;
-			    }
-			  sprintf (tt, "%03x", (int) fromtime);	//convert to a hex in a string
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
-
-			case 16:	// $TIMETO2    
-			  if (daterange == 1)
-			    {
-			      strptime (dateto, "%Y-%m-%d %H:%M:%S", &tm);
-
-			      tm.tm_isdst = -1;
-			      totime = mktime (&tm) - 86400;
-			      if (totime == -1)
-				{
-				  // Error we need to do something about it
-				  printf ("%03x", (int) totime);
-				  getchar ();
-				  printf ("\n%03x", (int) totime);
-				  getchar ();
-				  fromtime = 0;
-				  printf ("bad from");
-				  getchar ();
-				}
-			    }
-			  else
-			    totime = 0;
-			  sprintf (tt, "%03x", (int) totime);	//convert to a hex in a string
-			  for (i = 7; i > 0; i = i - 2)
-			    {	//change order and convert to integer
-			      ti[1] = tt[i];
-			      ti[0] = tt[i - 1];
-			      ti[2] = '\0';
-			      fl[cc] = conv (ti);
-			      cc++;
-			    }
-			  break;
-
-			case 19:	// $PASSWORD
-
-			  j = 0;
-			  for (i = 0; i < 12; i++)
-			    {
-			      if (conf.Password[j] == '\0')
-				fl[cc] = 0x88;
-			      else
-				{
-				  pass_i = conf.Password[j];
-				  fl[cc] = ((pass_i + 0x88) % 0xff);
-				  j++;
-				}
-			      cc++;
-			    }
-			  break;
-
-			case 21:	// $UNKNOWN
-			  for (i = 0; i < 4; i++)
-			    {
-			      fl[cc] = conf.InverterCode[i];
-			      cc++;
-			    }
-			  break;
-
-			case 22:	// $INVCODE
-			  fl[cc] = invcode;
-			  cc++;
-			  break;
-			case 23:	// $ARCHCODE
-			  fl[cc] = conf.ArchiveCode;
-			  cc++;
-			  break;
-			case 25:	// $CNT send counter
-			  send_count++;
-			  fl[cc] = send_count;
-			  cc++;
-			  break;
-			case 26:	// $TIMEZONE timezone in seconds, reverse endian
-			  fl[cc] = tzhex[0];
-			  fl[cc + 1] = tzhex[1];
-			  cc += 2;
-			  break;
-			case 27:	// $TIMESET unknown setting
-			  for (i = 0; i < 4; i++)
-			    {
-			      fl[cc] = timeset[i];
-			      cc++;
-			    }
-			  break;
-
-			default:
-			  fl[cc] = conv (lineread);
-			  cc++;
-			}
-
-		    }
-		  while (strcmp (lineread, "$END"));
-		  if (debug == 1)
-		    {
-		      printf ("[%d] %s sending:\n", linenum, debugdate ());
-		      printf
-			("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
-		      j = 12;
-		      for (i = 0; i < cc; i++)
-			{
-			  if (j % 16 == 0)
-			    printf ("\n    %08x: ", j);
-			  printf ("%02x ", fl[i]);
-			  j++;
-			}
-		      printf (" cc=%d", cc);
-		      printf ("\n\n");
-		    }
-		  last_sent =
-		    (unsigned char *) realloc (last_sent,
-					       sizeof (unsigned char) * (cc));
-		  memcpy (last_sent, fl, cc);
-		  write (s, fl, cc);
-		  already_read = 0;
-		  //check_send_error( &conf, &s, &rr, received, cc, last_sent, &terminated, &already_read ); 
-		}
+                        case 11:        // $TMPLUS 
+                          // get report time and convert
+                          sprintf (tt, "%x", (int) reporttime + 1);     //convert to a hex in a string
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
 
-	      if (!strcmp (lineread, "E"))
-		{		//See if line is something we need to extract
-		  if (debug == 1)
-		    printf ("[%d] %s Extracting\n", linenum, debugdate ());
-		  cc = 0;
-		  do
-		    {
-		      lineread = strtok (NULL, " ;");
-		      //printf( "\nselect=%d", select_str(lineread)); 
-		      switch (select_str (lineread))
-			{
+                        case 10:        // $TMMINUS
+                          // get report time and convert
+                          sprintf (tt, "%x", (int) reporttime - 1);     //convert to a hex in a string
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			case 3:	// Extract Serial of Inverter
+                        case 4: //$crc
+                          tryfcs16 (fl + 19, cc - 19);
+                          add_escapes (fl, &cc);
+                          fix_length_send (fl, &cc);
+                          break;
 
-			  data =
-			    ReadStream (&conf, &s, received, &rr, data,
-					&datalen, last_sent, cc, &terminated,
-					&togo);
-			  /*
-			     printf( "1.len=%d data=", datalen );
-			     for( i=0; i< datalen; i++ )
-			     printf( "%02x ", data[i] );
-			     printf( "\n" );
-			   */
-			  serial[3] = data[19];
-			  serial[2] = data[18];
-			  serial[1] = data[17];
-			  serial[0] = data[16];
-			  if (verbose == 1)
-			    printf ("serial=%02x:%02x:%02x:%02x\n",
-				    serial[3] & 0xff, serial[2] & 0xff,
-				    serial[1] & 0xff, serial[0] & 0xff);
-			  free (data);
-			  break;
+                        case 8: // $CHAN
+                          fl[cc] = chan[0];
+                          cc++;
+                          break;
 
-			case 9:	// extract Time from Inverter
-			  idate =
-			    (received[66] * 16777216) +
-			    (received[65] * 65536) + (received[64] * 256) +
-			    received[63];
-			  loctime = localtime (&idate);
-			  day = loctime->tm_mday;
-			  month = loctime->tm_mon + 1;
-			  year = loctime->tm_year + 1900;
-			  hour = loctime->tm_hour;
-			  minute = loctime->tm_min;
-			  second = loctime->tm_sec;
-			  printf ("Date power = %d/%d/%4d %02d:%02d:%02d\n",
-				  day, month, year, hour, minute, second);
-			  //currentpower = (received[72] * 256) + received[71];
-			  //printf("Current power = %i Watt\n",currentpower);
-			  break;
-			case 5:	// extract current power $POW
-			  data =
-			    ReadStream (&conf, &s, received, &rr, data,
-					&datalen, last_sent, cc, &terminated,
-					&togo);
-			  if ((data + 3)[0] == 0x08)
-			    gap = 40;
-			  if ((data + 3)[0] == 0x10)
-			    gap = 40;
-			  if ((data + 3)[0] == 0x40)
-			    gap = 28;
-			  if ((data + 3)[0] == 0x00)
-			    gap = 28;
-			  for (i = 0; i < datalen; i += gap)
-			    {
-			      idate =
-				ConvertStreamtoTime (data + i + 4, 4, &idate);
-			      loctime = localtime (&idate);
-			      day = loctime->tm_mday;
-			      month = loctime->tm_mon + 1;
-			      year = loctime->tm_year + 1900;
-			      hour = loctime->tm_hour;
-			      minute = loctime->tm_min;
-			      second = loctime->tm_sec;
-			      ConvertStreamtoFloat (data + i + 8, 3,
-						    &currentpower_total);
-			      return_key = -1;
-			      for (j = 0; j < num_return_keys; j++)
-				{
-				  if (((data + i + 1)[0] ==
-				       returnkeylist[j].key1)
-				      && ((data + i + 2)[0] ==
-					  returnkeylist[j].key2))
-				    {
-				      return_key = j;
-				      break;
-				    }
-				}
-			      if (return_key >= 0)
-				printf
-				  ("%d-%02d-%02d %02d:%02d:%02d %-20s = %.0f %-20s\n",
-				   year, month, day, hour, minute, second,
-				   returnkeylist[return_key].description,
-				   currentpower_total /
-				   returnkeylist[return_key].divisor,
-				   returnkeylist[return_key].units);
-			      else
-				printf
-				  ("%d-%02d-%02d %02d:%02d:%02d NO DATA for %02x %02x = %.0f NO UNITS\n",
-				   year, month, day, hour, minute, second,
-				   (data + i + 1)[0], (data + i + 1)[1],
-				   currentpower_total);
-			    }
-			  free (data);
-			  break;
+                        case 12:        // $TIMESTRING
+                          for (i = 0; i < 25; i++)
+                            {
+                              fl[cc] = timestr[i];
+                              cc++;
+                            }
+                          break;
 
-			case 6:	// extract total energy collected today
+                        case 13:        // $TIMEFROM1  
+                          // get report time and convert
+                          if (daterange == 1)
+                            {
+                              if (strptime
+                                  (datefrom, "%Y-%m-%d %H:%M:%S", &tm) == 0)
+                                {
+                                  if (debug == 1)
+                                    printf ("datefrom %s\n", datefrom);
+                                  printf ("Time Coversion Error\n");
+                                  error = 1;
+                                  exit (-1);
+                                }
+                              tm.tm_isdst = -1;
+                              fromtime = mktime (&tm);
+                              if (fromtime == -1)
+                                {
+                                  // Error we need to do something about it
+                                  printf ("%03x", (int) fromtime);
+                                  getchar ();
+                                  printf ("\n%03x", (int) fromtime);
+                                  getchar ();
+                                  fromtime = 0;
+                                  printf ("bad from");
+                                  getchar ();
+                                }
+                            }
+                          else
+                            {
+                              printf ("no from");
+                              getchar ();
+                              fromtime = 0;
+                            }
+                          sprintf (tt, "%03x", (int) fromtime - 300);   //convert to a hex in a string and start 5 mins before for dummy read.
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			  gtotal =
-			    (received[69] * 65536) + (received[68] * 256) +
-			    received[67];
-			  gtotal = gtotal / 1000;
-			  printf ("G total so far = %.2f Kwh\n", gtotal);
-			  dtotal = (received[84] * 256) + received[83];
-			  dtotal = dtotal / 1000;
-			  printf ("E total today = %.2f Kwh\n", dtotal);
-			  break;
+                        case 14:        // $TIMETO1    
+                          if (daterange == 1)
+                            {
+                              if (strptime (dateto, "%Y-%m-%d %H:%M:%S", &tm)
+                                  == 0)
+                                {
+                                  if (debug == 1)
+                                    printf ("dateto %s\n", dateto);
+                                  printf ("Time Coversion Error\n");
+                                  error = 1;
+                                  exit (-1);
+                                }
+                              tm.tm_isdst = -1;
+                              totime = mktime (&tm);
+                              if (totime == -1)
+                                {
+                                  // Error we need to do something about it
+                                  printf ("%03x", (int) totime);
+                                  getchar ();
+                                  printf ("\n%03x", (int) totime);
+                                  getchar ();
+                                  totime = 0;
+                                  printf ("bad to");
+                                  getchar ();
+                                }
+                            }
+                          else
+                            totime = 0;
+                          sprintf (tt, "%03x", (int) totime);   //convert to a hex in a string
+                          // get report time and convert
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			case 7:	// extract 2nd address
-			  memcpy (address2, received + 26, 6);
-			  if (debug == 1)
-			    printf ("address 2 \n");
-			  break;
+                        case 15:        // $TIMEFROM2
+                          if (daterange == 1)
+                            {
+                              strptime (datefrom, "%Y-%m-%d %H:%M:%S", &tm);
+                              tm.tm_isdst = -1;
+                              fromtime = mktime (&tm) - 86400;
+                              if (fromtime == -1)
+                                {
+                                  // Error we need to do something about it
+                                  printf ("%03x", (int) fromtime);
+                                  getchar ();
+                                  printf ("\n%03x", (int) fromtime);
+                                  getchar ();
+                                  fromtime = 0;
+                                  printf ("bad from");
+                                  getchar ();
+                                }
+                            }
+                          else
+                            {
+                              printf ("no from");
+                              getchar ();
+                              fromtime = 0;
+                            }
+                          sprintf (tt, "%03x", (int) fromtime); //convert to a hex in a string
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			case 8:	// extract bluetooth channel
-			  memcpy (chan, received + 22, 1);
-			  if (debug == 1)
-			    printf ("Bluetooth channel = %i\n", chan[0]);
-			  break;
+                        case 16:        // $TIMETO2    
+                          if (daterange == 1)
+                            {
+                              strptime (dateto, "%Y-%m-%d %H:%M:%S", &tm);
 
-			case 12:	// extract time strings $TIMESTRING
-			  if ((received[60] == 0x6d)
-			      && (received[61] == 0x23))
-			    {
-			      memcpy (timestr, received + 63, 24);
-			      if (debug == 1)
-				printf ("extracting timestring\n");
-			      memcpy (timeset, received + 79, 4);
-			      idate =
-				ConvertStreamtoTime (received + 63, 4,
-						     &idate);
-			      /* Allow delay for inverter to be slow */
-			      if (reporttime > idate)
-				{
-				  if (debug == 1)
-				    printf ("delay=%d\n",
-					    (int) (reporttime - idate));
-				  //sleep( reporttime - idate );
-				  sleep (5);	//was sleeping for > 1min excessive
-				}
-			    }
-			  else
-			    {
-			      memcpy (timestr, received + 63, 24);
-			      if (debug == 1)
-				printf ("bad extracting timestring\n");
-			      already_read = 0;
-			      fseek (fp, returnpos, 0);
-			      linenum = returnline;
-			      found = 0;
-			      if (archdatalen > 0)
-				free (archdatalist);
-			      archdatalen = 0;
-			      strcpy (lineread, "");
-			      failedbluetooth++;
-			      if (failedbluetooth > 60)
-				exit (-1);
-			      goto start;
-			      //exit(-1);
-			    }
+                              tm.tm_isdst = -1;
+                              totime = mktime (&tm) - 86400;
+                              if (totime == -1)
+                                {
+                                  // Error we need to do something about it
+                                  printf ("%03x", (int) totime);
+                                  getchar ();
+                                  printf ("\n%03x", (int) totime);
+                                  getchar ();
+                                  fromtime = 0;
+                                  printf ("bad from");
+                                  getchar ();
+                                }
+                            }
+                          else
+                            totime = 0;
+                          sprintf (tt, "%03x", (int) totime);   //convert to a hex in a string
+                          for (i = 7; i > 0; i = i - 2)
+                            {   //change order and convert to integer
+                              ti[1] = tt[i];
+                              ti[0] = tt[i - 1];
+                              ti[2] = '\0';
+                              fl[cc] = conv (ti);
+                              cc++;
+                            }
+                          break;
 
-			  break;
+                        case 19:        // $PASSWORD
 
-			case 17:	// Test data
-			  data =
-			    ReadStream (&conf, &s, received, &rr, data,
-					&datalen, last_sent, cc, &terminated,
-					&togo);
-			  printf ("\n");
+                          j = 0;
+                          for (i = 0; i < 12; i++)
+                            {
+                              if (conf.Password[j] == '\0')
+                                fl[cc] = 0x88;
+                              else
+                                {
+                                  pass_i = conf.Password[j];
+                                  fl[cc] = ((pass_i + 0x88) % 0xff);
+                                  j++;
+                                }
+                              cc++;
+                            }
+                          break;
 
-			  free (data);
-			  break;
+                        case 21:        // $UNKNOWN
+                          for (i = 0; i < 4; i++)
+                            {
+                              fl[cc] = conf.InverterCode[i];
+                              cc++;
+                            }
+                          break;
 
-			case 18:	// $ARCHIVEDATA1
-			  finished = 0;
-			  ptotal = 0;
-			  idate = 0;
-			  printf ("\n");
-			  while (finished != 1)
-			    {
-			      data =
-				ReadStream (&conf, &s, received, &rr, data,
-					    &datalen, last_sent, cc,
-					    &terminated, &togo);
+                        case 22:        // $INVCODE
+                          fl[cc] = invcode;
+                          cc++;
+                          break;
+                        case 23:        // $ARCHCODE
+                          fl[cc] = conf.ArchiveCode;
+                          cc++;
+                          break;
+                        case 25:        // $CNT send counter
+                          send_count++;
+                          fl[cc] = send_count;
+                          cc++;
+                          break;
+                        case 26:        // $TIMEZONE timezone in seconds, reverse endian
+                          fl[cc] = tzhex[0];
+                          fl[cc + 1] = tzhex[1];
+                          cc += 2;
+                          break;
+                        case 27:        // $TIMESET unknown setting
+                          for (i = 0; i < 4; i++)
+                            {
+                              fl[cc] = timeset[i];
+                              cc++;
+                            }
+                          break;
 
-			      j = 0;
-			      for (i = 0; i < datalen; i++)
-				{
-				  datarecord[j] = data[i];
-				  j++;
-				  if (j > 11)
-				    {
-				      if (idate > 0)
-					prev_idate = idate;
-				      else
-					prev_idate = 0;
-				      idate =
-					ConvertStreamtoTime (datarecord, 4,
-							     &idate);
-				      if (prev_idate == 0)
-					prev_idate = idate - 300;
+                        default:
+                          fl[cc] = conv (lineread);
+                          cc++;
+                        }
 
-				      loctime = localtime (&idate);
-				      day = loctime->tm_mday;
-				      month = loctime->tm_mon + 1;
-				      year = loctime->tm_year + 1900;
-				      hour = loctime->tm_hour;
-				      minute = loctime->tm_min;
-				      second = loctime->tm_sec;
-				      ConvertStreamtoFloat (datarecord + 4, 8,
-							    &gtotal);
-				      if (archdatalen == 0)
-					ptotal = gtotal;
-				      printf
-					("\n%d/%d/%4d %02d:%02d:%02d  total=%.3f Kwh current=%.0f Watts togo=%d i=%d crc=%d",
-					 day, month, year, hour, minute,
-					 second, gtotal / 1000,
-					 (gtotal - ptotal) * 12, togo, i,
-					 crc_at_end);
-				      if (idate != prev_idate + 300)
-					{
-					  printf
-					    ("Date Error! prev=%d current=%d\n",
-					     (int) prev_idate, (int) idate);
-					  error = 1;
-					  break;
-					}
-				      if (archdatalen == 0)
-					archdatalist =
-					  (struct archdata_type *)
-					  malloc (sizeof
-						  (struct archdata_type));
-				      else
-					archdatalist =
-					  (struct archdata_type *)
-					  realloc (archdatalist,
-						   sizeof (struct
-							   archdata_type) *
-						   (archdatalen + 1));
-				      (archdatalist + archdatalen)->date =
-					idate;
-				      strcpy ((archdatalist +
-					       archdatalen)->inverter,
-					      conf.Inverter);
-				      ConvertStreamtoLong (serial, 4,
-							   &(archdatalist +
-							     archdatalen)->
-							   serial);
-				      (archdatalist +
-				       archdatalen)->accum_value =
-			 gtotal / 1000;
-				      (archdatalist +
-				       archdatalen)->current_value =
-			 (gtotal - ptotal) * 12;
-				      archdatalen++;
-				      ptotal = gtotal;
-				      j = 0;	//get ready for another record
-				    }
-				}
-			      if (togo == 0)
-				finished = 1;
-			      else
-				if (read_bluetooth
-				    (&conf, &s, &rr, received, cc, last_sent,
-				     &terminated) != 0)
-				{
-				  fseek (fp, returnpos, 0);
-				  linenum = returnline;
-				  found = 0;
-				  if (archdatalen > 0)
-				    free (archdatalist);
-				  archdatalen = 0;
-				  strcpy (lineread, "");
-				  sleep (10);
-				  failedbluetooth++;
-				  if (failedbluetooth > 3)
-				    exit (-1);
-				  goto start;
-				}
-			    }
-			  free (data);
-			  printf ("\n");
+                    }
+                  while (strcmp (lineread, "$END"));
+                  if (debug == 1)
+                    {
+                      printf ("[%d] %s sending:\n", linenum, debugdate ());
+                      printf
+                        ("    %08x: .. .. .. .. .. .. .. .. .. .. .. .. ", 0);
+                      j = 12;
+                      for (i = 0; i < cc; i++)
+                        {
+                          if (j % 16 == 0)
+                            printf ("\n    %08x: ", j);
+                          printf ("%02x ", fl[i]);
+                          j++;
+                        }
+                      printf (" cc=%d", cc);
+                      printf ("\n\n");
+                    }
+                  last_sent =
+                    (unsigned char *) realloc (last_sent,
+                                               sizeof (unsigned char) * (cc));
+                  memcpy (last_sent, fl, cc);
+                  write (s, fl, cc);
+                  already_read = 0;
+                  //check_send_error( &conf, &s, &rr, received, cc, last_sent, &terminated, &already_read ); 
+                }
 
-			  break;
-			case 20:	// SIGNAL signal strength
 
-			  strength = (received[22] * 100.0) / 0xff;
-			  if (verbose == 1)
-			    {
-			      printf ("bluetooth signal = %.0f%%\n",
-				      strength);
-			    }
-			  break;
-			case 22:	// extract time strings $INVCODE
-			  invcode = received[22];
-			  if (debug == 1)
-			    printf ("extracting invcode=%02x\n", invcode);
+              if (!strcmp (lineread, "E"))
+                {               //See if line is something we need to extract
+                  if (debug == 1)
+                    printf ("[%d] %s Extracting\n", linenum, debugdate ());
+                  cc = 0;
+                  do
+                    {
+                      lineread = strtok (NULL, " ;");
+                      //printf( "\nselect=%d", select_str(lineread)); 
+                      switch (select_str (lineread))
+                        {
 
-			  break;
-			case 24:	// Inverter data $INVERTERDATA
-			  data =
-			    ReadStream (&conf, &s, received, &rr, data,
-					&datalen, last_sent, cc, &terminated,
-					&togo);
-			  if (debug == 1)
-			    printf ("data=%02x\n", (data + 3)[0]);
-			  if ((data + 3)[0] == 0x08)
-			    gap = 40;
-			  if ((data + 3)[0] == 0x10)
-			    gap = 40;
-			  if ((data + 3)[0] == 0x40)
-			    gap = 28;
-			  if ((data + 3)[0] == 0x00)
-			    gap = 28;
-			  for (i = 0; i < datalen; i += gap)
-			    {
-			      idate =
-				ConvertStreamtoTime (data + i + 4, 4, &idate);
-			      loctime = localtime (&idate);
-			      day = loctime->tm_mday;
-			      month = loctime->tm_mon + 1;
-			      year = loctime->tm_year + 1900;
-			      hour = loctime->tm_hour;
-			      minute = loctime->tm_min;
-			      second = loctime->tm_sec;
-			      ConvertStreamtoFloat (data + i + 8, 3,
-						    &currentpower_total);
-			      return_key = -1;
-			      for (j = 0; j < num_return_keys; j++)
-				{
-				  if (((data + i + 1)[0] ==
-				       returnkeylist[j].key1)
-				      && ((data + i + 2)[0] ==
-					  returnkeylist[j].key2))
-				    {
-				      return_key = j;
-				      break;
-				    }
-				}
-			      if (return_key >= 0)
-				{
-				  if (i == 0)
-				    printf
-				      ("%d-%02d-%02d  %02d:%02d:%02d %s\n",
-				       year, month, day, hour, minute, second,
-				       (data + i + 8));
-				  printf
-				    ("%d-%02d-%02d %02d:%02d:%02d %-20s = %.0f %-20s\n",
-				     year, month, day, hour, minute, second,
-				     returnkeylist[return_key].description,
-				     currentpower_total /
-				     returnkeylist[return_key].divisor,
-				     returnkeylist[return_key].units);
-				}
-			      else
-				printf
-				  ("%d-%02d-%02d %02d:%02d:%02d NO DATA for %02x %02x = %.0f NO UNITS \n",
-				   year, month, day, hour, minute, second,
-				   (data + i + 1)[0], (data + i + 1)[0],
-				   currentpower_total);
-			    }
-			  free (data);
-			  break;
-			}
-		    }
+                        case 3: // Extract Serial of Inverter
 
-		  while (strcmp (lineread, "$END"));
-		}
-	      if (!strcmp (lineread, ":init"))
-		{		//See if line is something we need to extract
-		  initstarted = 1;
-		  returnpos = ftell (fp);
-		  returnline = linenum;
-		}
-	      if (!strcmp (lineread, ":setup"))
-		{		//See if line is something we need to extract
-		  setupstarted = 1;
-		  returnpos = ftell (fp);
-		  returnline = linenum;
-		}
-	      if (!strcmp (lineread, ":startsetup"))
-		{		//See if line is something we need to extract
-		  sleep (1);
-		}
-	      if (!strcmp (lineread, ":setinverter1"))
-		{		//See if line is something we need to extract
-		  setupstarted = 1;
-		  returnpos = ftell (fp);
-		  returnline = linenum;
-		}
-	      if (!strcmp (lineread, ":getrangedata"))
-		{		//See if line is something we need to extract
-		  rangedatastarted = 1;
-		  returnpos = ftell (fp);
-		  returnline = linenum;
-		}
-	    }
-	}
+                          data =
+                            ReadStream (&conf, &s, received, &rr, data,
+                                        &datalen, last_sent, cc, &terminated,
+                                        &togo);
+                          /*
+                             printf( "1.len=%d data=", datalen );
+                             for( i=0; i< datalen; i++ )
+                             printf( "%02x ", data[i] );
+                             printf( "\n" );
+                           */
+                          serial[3] = data[19];
+                          serial[2] = data[18];
+                          serial[1] = data[17];
+                          serial[0] = data[16];
+                          if (verbose == 1)
+                            printf ("serial=%02x:%02x:%02x:%02x\n",
+                                    serial[3] & 0xff, serial[2] & 0xff,
+                                    serial[1] & 0xff, serial[0] & 0xff);
+                          free (data);
+                          break;
 
-      curtime = time (NULL);	//get time in seconds since epoch (1/1/1970) 
+                        case 9: // extract Time from Inverter
+                          idate =
+                            (received[66] * 16777216) +
+                            (received[65] * 65536) + (received[64] * 256) +
+                            received[63];
+                          loctime = localtime (&idate);
+                          day = loctime->tm_mday;
+                          month = loctime->tm_mon + 1;
+                          year = loctime->tm_year + 1900;
+                          hour = loctime->tm_hour;
+                          minute = loctime->tm_min;
+                          second = loctime->tm_sec;
+                          printf ("Date power = %d/%d/%4d %02d:%02d:%02d\n",
+                                  day, month, year, hour, minute, second);
+                          //currentpower = (received[72] * 256) + received[71];
+                          //printf("Current power = %i Watt\n",currentpower);
+                          break;
+                        case 5: // extract current power $POW
+                          data =
+                            ReadStream (&conf, &s, received, &rr, data,
+                                        &datalen, last_sent, cc, &terminated,
+                                        &togo);
+                          if ((data + 3)[0] == 0x08)
+                            gap = 40;
+                          if ((data + 3)[0] == 0x10)
+                            gap = 40;
+                          if ((data + 3)[0] == 0x40)
+                            gap = 28;
+                          if ((data + 3)[0] == 0x00)
+                            gap = 28;
+                          for (i = 0; i < datalen; i += gap)
+                            {
+                              idate =
+                                ConvertStreamtoTime (data + i + 4, 4, &idate);
+                              loctime = localtime (&idate);
+                              day = loctime->tm_mday;
+                              month = loctime->tm_mon + 1;
+                              year = loctime->tm_year + 1900;
+                              hour = loctime->tm_hour;
+                              minute = loctime->tm_min;
+                              second = loctime->tm_sec;
+                              ConvertStreamtoFloat (data + i + 8, 3,
+                                                    &currentpower_total);
+                              return_key = -1;
+                              for (j = 0; j < num_return_keys; j++)
+                                {
+                                  if (((data + i + 1)[0] ==
+                                       returnkeylist[j].key1)
+                                      && ((data + i + 2)[0] ==
+                                          returnkeylist[j].key2))
+                                    {
+                                      return_key = j;
+                                      break;
+                                    }
+                                }
+                              if (return_key >= 0)
+                                printf
+                                  ("%d-%02d-%02d %02d:%02d:%02d %-20s = %.0f %-20s\n",
+                                   year, month, day, hour, minute, second,
+                                   returnkeylist[return_key].description,
+                                   currentpower_total /
+                                   returnkeylist[return_key].divisor,
+                                   returnkeylist[return_key].units);
+                              else
+                                printf
+                                  ("%d-%02d-%02d %02d:%02d:%02d NO DATA for %02x %02x = %.0f NO UNITS\n",
+                                   year, month, day, hour, minute, second,
+                                   (data + i + 1)[0], (data + i + 1)[1],
+                                   currentpower_total);
+                            }
+                          free (data);
+                          break;
+
+                        case 6: // extract total energy collected today
+
+                          gtotal =
+                            (received[69] * 65536) + (received[68] * 256) +
+                            received[67];
+                          gtotal = gtotal / 1000;
+                          printf ("G total so far = %.2f Kwh\n", gtotal);
+                          dtotal = (received[84] * 256) + received[83];
+                          dtotal = dtotal / 1000;
+                          printf ("E total today = %.2f Kwh\n", dtotal);
+                          break;
+
+                        case 7: // extract 2nd address
+                          memcpy (address2, received + 26, 6);
+                          if (debug == 1)
+                            printf ("address 2 \n");
+                          break;
+
+                        case 8: // extract bluetooth channel
+                          memcpy (chan, received + 22, 1);
+                          if (debug == 1)
+                            printf ("Bluetooth channel = %i\n", chan[0]);
+                          break;
+
+                        case 12:        // extract time strings $TIMESTRING
+                          if ((received[60] == 0x6d)
+                              && (received[61] == 0x23))
+                            {
+                              memcpy (timestr, received + 63, 24);
+                              if (debug == 1)
+                                printf ("extracting timestring\n");
+                              memcpy (timeset, received + 79, 4);
+                              idate =
+                                ConvertStreamtoTime (received + 63, 4,
+                                                     &idate);
+                              /* Allow delay for inverter to be slow */
+                              if (reporttime > idate)
+                                {
+                                  if (debug == 1)
+                                    printf ("delay=%d\n",
+                                            (int) (reporttime - idate));
+                                  //sleep( reporttime - idate );
+                                  sleep (5);    //was sleeping for > 1min excessive
+                                }
+                            }
+                          else
+                            {
+                              memcpy (timestr, received + 63, 24);
+                              if (debug == 1)
+                                printf ("bad extracting timestring\n");
+                              already_read = 0;
+                              fseek (fp, returnpos, 0);
+                              linenum = returnline;
+                              found = 0;
+                              if (archdatalen > 0)
+                                free (archdatalist);
+                              archdatalen = 0;
+                              strcpy (lineread, "");
+                              failedbluetooth++;
+                              if (failedbluetooth > 60)
+                                exit (-1);
+                              goto start;
+                              //exit(-1);
+                            }
+
+                          break;
+
+                        case 17:        // Test data
+                          data =
+                            ReadStream (&conf, &s, received, &rr, data,
+                                        &datalen, last_sent, cc, &terminated,
+                                        &togo);
+                          printf ("\n");
+
+                          free (data);
+                          break;
+
+                        case 18:        // $ARCHIVEDATA1
+                          finished = 0;
+                          ptotal = 0;
+                          idate = 0;
+                          printf ("\n");
+                          while (finished != 1)
+                            {
+                              data =
+                                ReadStream (&conf, &s, received, &rr, data,
+                                            &datalen, last_sent, cc,
+                                            &terminated, &togo);
+
+                              j = 0;
+                              for (i = 0; i < datalen; i++)
+                                {
+                                  datarecord[j] = data[i];
+                                  j++;
+                                  if (j > 11)
+                                    {
+                                      if (idate > 0)
+                                        prev_idate = idate;
+                                      else
+                                        prev_idate = 0;
+                                      idate =
+                                        ConvertStreamtoTime (datarecord, 4,
+                                                             &idate);
+                                      if (prev_idate == 0)
+                                        prev_idate = idate - 300;
+
+                                      loctime = localtime (&idate);
+                                      day = loctime->tm_mday;
+                                      month = loctime->tm_mon + 1;
+                                      year = loctime->tm_year + 1900;
+                                      hour = loctime->tm_hour;
+                                      minute = loctime->tm_min;
+                                      second = loctime->tm_sec;
+                                      ConvertStreamtoFloat (datarecord + 4, 8,
+                                                            &gtotal);
+                                      if (archdatalen == 0)
+                                        ptotal = gtotal;
+                                      printf
+                                        ("\n%d/%d/%4d %02d:%02d:%02d  total=%.3f Kwh current=%.0f Watts togo=%d i=%d crc=%d",
+                                         day, month, year, hour, minute,
+                                         second, gtotal / 1000,
+                                         (gtotal - ptotal) * 12, togo, i,
+                                         crc_at_end);
+                                      if (idate != prev_idate + 300)
+                                        {
+                                          printf
+                                            ("Date Error! prev=%d current=%d\n",
+                                             (int) prev_idate, (int) idate);
+                                          error = 1;
+                                          break;
+                                        }
+                                      if (archdatalen == 0)
+                                        archdatalist =
+                                          (struct archdata_type *)
+                                          malloc (sizeof
+                                                  (struct archdata_type));
+                                      else
+                                        archdatalist =
+                                          (struct archdata_type *)
+                                          realloc (archdatalist,
+                                                   sizeof (struct
+                                                           archdata_type) *
+                                                   (archdatalen + 1));
+                                      (archdatalist + archdatalen)->date =
+                                        idate;
+                                      strcpy ((archdatalist +
+                                               archdatalen)->inverter,
+                                              conf.Inverter);
+                                      ConvertStreamtoLong (serial, 4,
+                                                           &(archdatalist +
+                                                             archdatalen)->
+                                                           serial);
+                                      (archdatalist + archdatalen)->accum_value = gtotal / 1000;
+                                      (archdatalist + archdatalen)->current_value = (gtotal - ptotal) * 12;
+                                      archdatalen++;
+                                      ptotal = gtotal;
+                                      j = 0;    //get ready for another record
+                                    }
+                                }
+                              if (togo == 0)
+                                finished = 1;
+                              else
+                                if (read_bluetooth
+                                    (&conf, &s, &rr, received, cc, last_sent,
+                                     &terminated) != 0)
+                                {
+                                  fseek (fp, returnpos, 0);
+                                  linenum = returnline;
+                                  found = 0;
+                                  if (archdatalen > 0)
+                                    free (archdatalist);
+                                  archdatalen = 0;
+                                  strcpy (lineread, "");
+                                  sleep (10);
+                                  failedbluetooth++;
+                                  if (failedbluetooth > 3)
+                                    exit (-1);
+                                  goto start;
+                                }
+                            }
+                          free (data);
+                          printf ("\n");
+
+                          break;
+                        case 20:        // SIGNAL signal strength
+
+                          strength = (received[22] * 100.0) / 0xff;
+                          if (verbose == 1)
+                            {
+                              printf ("bluetooth signal = %.0f%%\n",
+                                      strength);
+                            }
+                          break;
+                        case 22:        // extract time strings $INVCODE
+                          invcode = received[22];
+                          if (debug == 1)
+                            printf ("extracting invcode=%02x\n", invcode);
+
+                          break;
+                        case 24:        // Inverter data $INVERTERDATA
+                          data =
+                            ReadStream (&conf, &s, received, &rr, data,
+                                        &datalen, last_sent, cc, &terminated,
+                                        &togo);
+                          if (debug == 1)
+                            printf ("data=%02x\n", (data + 3)[0]);
+                          if ((data + 3)[0] == 0x08)
+                            gap = 40;
+                          if ((data + 3)[0] == 0x10)
+                            gap = 40;
+                          if ((data + 3)[0] == 0x40)
+                            gap = 28;
+                          if ((data + 3)[0] == 0x00)
+                            gap = 28;
+                          for (i = 0; i < datalen; i += gap)
+                            {
+                              idate =
+                                ConvertStreamtoTime (data + i + 4, 4, &idate);
+                              loctime = localtime (&idate);
+                              day = loctime->tm_mday;
+                              month = loctime->tm_mon + 1;
+                              year = loctime->tm_year + 1900;
+                              hour = loctime->tm_hour;
+                              minute = loctime->tm_min;
+                              second = loctime->tm_sec;
+                              ConvertStreamtoFloat (data + i + 8, 3,
+                                                    &currentpower_total);
+                              return_key = -1;
+                              for (j = 0; j < num_return_keys; j++)
+                                {
+                                  if (((data + i + 1)[0] ==
+                                       returnkeylist[j].key1)
+                                      && ((data + i + 2)[0] ==
+                                          returnkeylist[j].key2))
+                                    {
+                                      return_key = j;
+                                      break;
+                                    }
+                                }
+                              if (return_key >= 0)
+                                {
+                                  if (i == 0)
+                                    printf
+                                      ("%d-%02d-%02d  %02d:%02d:%02d %s\n",
+                                       year, month, day, hour, minute, second,
+                                       (data + i + 8));
+                                  printf
+                                    ("%d-%02d-%02d %02d:%02d:%02d %-20s = %.0f %-20s\n",
+                                     year, month, day, hour, minute, second,
+                                     returnkeylist[return_key].description,
+                                     currentpower_total /
+                                     returnkeylist[return_key].divisor,
+                                     returnkeylist[return_key].units);
+                                }
+                              else
+                                printf
+                                  ("%d-%02d-%02d %02d:%02d:%02d NO DATA for %02x %02x = %.0f NO UNITS \n",
+                                   year, month, day, hour, minute, second,
+                                   (data + i + 1)[0], (data + i + 1)[0],
+                                   currentpower_total);
+                            }
+                          free (data);
+                          break;
+                        }
+                    }
+
+                  while (strcmp (lineread, "$END"));
+                }
+              if (!strcmp (lineread, ":init"))
+                {               //See if line is something we need to extract
+                  initstarted = 1;
+                  returnpos = ftell (fp);
+                  returnline = linenum;
+                }
+              if (!strcmp (lineread, ":setup"))
+                {               //See if line is something we need to extract
+                  setupstarted = 1;
+                  returnpos = ftell (fp);
+                  returnline = linenum;
+                }
+              if (!strcmp (lineread, ":startsetup"))
+                {               //See if line is something we need to extract
+                  sleep (1);
+                }
+              if (!strcmp (lineread, ":setinverter1"))
+                {               //See if line is something we need to extract
+                  setupstarted = 1;
+                  returnpos = ftell (fp);
+                  returnline = linenum;
+                }
+              if (!strcmp (lineread, ":getrangedata"))
+                {               //See if line is something we need to extract
+                  rangedatastarted = 1;
+                  returnpos = ftell (fp);
+                  returnline = linenum;
+                }
+            }
+        }
+
+      curtime = time (NULL);    //get time in seconds since epoch (1/1/1970) 
       loctime = localtime (&curtime);
       day = loctime->tm_mday;
       month = loctime->tm_mon + 1;
@@ -2831,7 +2827,7 @@ main (int argc, char **argv)
 
       close (s);
       if (archdatalen > 0)
-	free (archdatalist);
+        free (archdatalist);
       archdatalen = 0;
       free (last_sent);
     }
