@@ -1,12 +1,13 @@
 #pragma once
 #include <string>
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 
 class BtAddr {
 public:
     BtAddr(const std::string& addr);
 
-    struct sockaddr_rc getSockAddr(uint8_t channel=1) const;
+    void getSockAddr(struct sockaddr_rc& addr, uint8_t channel=1) const;
     
 private:
     bdaddr_t m_addr;
