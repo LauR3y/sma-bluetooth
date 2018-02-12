@@ -1,4 +1,5 @@
-#include <string>;
+#pragma once
+#include <string>
 #include <bluetooth/bluetooth.h>
 
 class BtAddr {
@@ -8,5 +9,5 @@ public:
     struct sockaddr_rc getSockAddr(uint8_t channel=1) const;
     
 private:
-    btaddr_t m_addr;
+    bdaddr_t m_addr;
 };
