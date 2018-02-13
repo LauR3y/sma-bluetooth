@@ -9,3 +9,9 @@ void BtAddr::getSockAddr(struct sockaddr_rc& sockaddr, uint8_t channel) const {
     sockaddr.rc_channel = channel;
     memcpy(&sockaddr.rc_bdaddr, &m_addr, sizeof(sockaddr.rc_bdaddr));
 }
+
+void BtAddr::addToMsg(std::vector<uint8_t> message) {
+    for (size_t i = 0; i < sizeof(btaddr_t); ++i) {
+        message.push_back(m_addr.b[i]);
+    }
+}
