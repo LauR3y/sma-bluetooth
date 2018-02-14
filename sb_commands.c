@@ -811,7 +811,7 @@ int ProcessCommand(ConfType *conf, FlagType *flag, UnitType **unit, int *s, FILE
                         printf("E total today = %.2f Kwh\n", dtotal);
                         break;
 
-                    case 7: // extract 2nd address
+                    case 7: // extract 2nd address $ADD2
                         printf("\naddress=");
                         for (i = 0; i < 6; i++)
                         {

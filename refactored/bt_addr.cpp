@@ -5,6 +5,19 @@ BtAddr::BtAddr(const std::string& addr) {
     str2ba(addr.c_str(), &m_addr);
 }
 
+BtAddr::BtAddr(const std::vector<uint8_t>& buffer, size_t offset) {
+    if (buffer.size() - offset < 6) {
+        throw std::runtime_error("Insufficient data for a bluetooth addrerss");
+    }
+    bacpy(&m_addr, &buffer[offset]);
+}
+
+std::string toString() const {
+    char str[128];
+    ba2str(&m_addr, str);
+    return std::string(str);   
+}
+
 void BtAddr::getSockAddr(struct sockaddr_rc& sockaddr, uint8_t channel) const {
     sockaddr.rc_family = AF_BLUETOOTH;
     sockaddr.rc_channel = channel;

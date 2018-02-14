@@ -49,14 +49,14 @@ typedef u_int16_t u16;
 #define _XOPEN_SOURCE /* glibc2 needs this */
 
 char *accepted_strings[] = {
-    "$END",
-    "$ADDR",
-    "$TIME",
-    "$SERIAL",
-    "$CRC",
-    "$POW",
-    "$DTOT",
-    "$ADD2",
+    "$END", // 0
+    "$ADDR", // 1
+    "$TIME", // 2
+    "$SERIAL", // 3
+    "$CRC", // 4
+    "$POW", // 5
+    "$DTOT", // 6
+    "$ADD2", // 7
     "$CHAN",
     "$ITIME",
     "$TMMI",
