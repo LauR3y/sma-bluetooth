@@ -19,7 +19,7 @@ int main(int argc, const char* argv[]) {
 	SbConnection connection(addr);
 
 	// Read first message
-	std::vector<uint8_t> init = connection.read();
+	std::vector<uint8_t> init = connection.receive();
 	std::cout << "Received:" << std::endl;
 	dump(init);
 
@@ -37,13 +37,13 @@ int main(int argc, const char* argv[]) {
 	message.insert(message.end(), last.begin(), last.end());
 	std::cout << "Sending:" << std::endl;
 	dump(message);
-	connection.write(message);
+	connection.send(message);
 
 	// R 7E 22 00 5C $ADDR 00 00 00 00 00 00 05 00 $ADDR $END;
 	bool found = false;
 	std::vector<uint8_t> response;
 	while(!found) {
-		response = connection.read();
+		response = connection.receive();
 		std::cout << "Received:" << std::endl;
 		dump(response);
 		found = (response[3] == 0x5C);

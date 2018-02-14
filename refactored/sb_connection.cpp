@@ -1,4 +1,5 @@
 #include "sb_connection.h"
+#include <unistd.h>
 #include <sys/socket.h>
 #include <stdexcept>
 
@@ -19,11 +20,11 @@ SbConnection::~SbConnection() {
     //close(m_socket);
 }
 
-void SbConnection::write(const std::vector<unsigned char>& payload) {
-    ::write(m_socket, &payload[0], payload.size());
+void SbConnection::send(const std::vector<unsigned char>& payload) {
+    write(m_socket, &payload[0], payload.size());
 }
 
-std::vector<uint8_t> SbConnection::read() {
+std::vector<uint8_t> SbConnection::receive() {
     struct timeval tv;
     fd_set readfds;
 

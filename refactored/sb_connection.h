@@ -8,8 +8,8 @@ public:
     SbConnection(const BtAddr& addr);
     ~SbConnection();
 
-    void write(const std::vector<uint8_t>& payload);
-    std::vector<uint8_t> read();
+    void send(const std::vector<uint8_t>& payload);
+    std::vector<uint8_t> receive();
 
 private:
     BtAddr m_addr;
