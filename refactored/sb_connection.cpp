@@ -20,7 +20,7 @@ SbConnection::~SbConnection() {
 }
 
 void SbConnection::write(const std::vector<unsigned char>& payload) {
-
+    ::write(m_socket, &payload[0], payload.size());
 }
 
 std::vector<uint8_t> SbConnection::read() {
