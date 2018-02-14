@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
 	}
 	
 	// E $ADD2 $END;
-	BtAddr addr2(received, 26);
+	BtAddr addr2(response, 26);
 	std::cout << "E $ADD2: " << addr2.toString() << std::endl;
 
 	// Login

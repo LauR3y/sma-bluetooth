@@ -9,7 +9,7 @@ public:
     BtAddr(const std::string& addr);
     BtAddr(const std::vector<uint8_t>& buffer, size_t offset=0);
 
-    std::string toStr() const;
+    std::string toString() const;
     void getSockAddr(struct sockaddr_rc& addr, uint8_t channel=1) const;
     void addToMsg(std::vector<uint8_t>& message);
     

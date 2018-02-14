@@ -9,10 +9,10 @@ BtAddr::BtAddr(const std::vector<uint8_t>& buffer, size_t offset) {
     if (buffer.size() - offset < 6) {
         throw std::runtime_error("Insufficient data for a bluetooth addrerss");
     }
-    bacpy(&m_addr, &buffer[offset]);
+    memcpy(&m_addr, &buffer[offset], sizeof(bdaddr_t));
 }
 
-std::string toString() const {
+std::string BtAddr::toString() const {
     char str[128];
     ba2str(&m_addr, str);
     return std::string(str);   
