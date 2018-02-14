@@ -57,30 +57,30 @@ char *accepted_strings[] = {
     "$POW", // 5
     "$DTOT", // 6
     "$ADD2", // 7
-    "$CHAN",
-    "$ITIME",
-    "$TMMI",
-    "$TMPL",
-    "$TIMESTRING",
-    "$TIMEFROM1",
-    "$TIMETO1",
-    "$TIMEFROM2",
-    "$TIMETO2",
-    "$TESTDATA",
-    "$ARCHIVEDATA1",
-    "$PASSWORD",
-    "$SIGNAL",
-    "$SUSYID",
-    "$INVCODE",
-    "$ARCHCODE",
-    "$INVERTERDATA",
-    "$CNT",      /*Counter of sent packets*/
-    "$TIMEZONE", /*Timezone seconds +1 from GMT*/
-    "$TIMESET",  /*Unknown string involved in time setting*/
-    "$DATA",     /*Data string */
-    "$MYSUSYID",
-    "$MYSERIAL",
-    "$LOGIN"};
+    "$CHAN", // 8
+    "$ITIME", // 9
+    "$TMMI", // 10
+    "$TMPL", // 11
+    "$TIMESTRING", // 12
+    "$TIMEFROM1", // 13
+    "$TIMETO1", // 14
+    "$TIMEFROM2", // 15
+    "$TIMETO2", // 16
+    "$TESTDATA", // 17
+    "$ARCHIVEDATA1", // 18
+    "$PASSWORD", // 19
+    "$SIGNAL", // 20
+    "$SUSYID", // 21
+    "$INVCODE", // 22
+    "$ARCHCODE", // 23
+    "$INVERTERDATA", // 24
+    "$CNT",      // 25 /*Counter of sent packets*/
+    "$TIMEZONE", // 26 /*Timezone seconds +1 from GMT*/
+    "$TIMESET",  // 27 /*Unknown string involved in time setting*/
+    "$DATA",     // 28 /*Data string */
+    "$MYSUSYID", // 29
+    "$MYSERIAL", // 30
+    "$LOGIN"}; // 31
 
 int cc;
 unsigned char fl[1024] = {0};
