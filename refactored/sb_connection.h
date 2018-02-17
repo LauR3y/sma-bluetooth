@@ -14,6 +14,6 @@ public:
 private:
     BtAddr m_addr;
     int    m_socket;
-    int m_connected;
+    int    m_connected;
 };
 

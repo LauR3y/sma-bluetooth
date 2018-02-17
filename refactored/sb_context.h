@@ -7,18 +7,15 @@ public:
     SbContext(const std::string& addr);
 
     SbContext connect();
+    SbContext ping();
 
-private:
     void send(const std::vector<uint8_t>& message);
     std::vector<uint8_t> receive();
+
+    // Needs to wait for command
     std::vector<uint8_t> waitFor(uint8_t type);
-    
-    std::ostream dump(const std::vector<uint8_t>& msg, std::ostream& os);
-    std::vector<uint8_t> buildMessage61();
-    std::vector<uint8_t> buildMessage6A();
-    std::vector<uint8_t> buildMessage2A();
-    std::vector<uint8_t> append(std::vector<uint8_t>& message, const std::vector<uint8_t>& toAppend);
-    
+        
+private:
     BtAddr       m_sbAddr;
     uint8_t      m_invCode;
     BtAddr       m_myAddr;
