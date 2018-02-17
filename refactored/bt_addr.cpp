@@ -1,8 +1,8 @@
 #include "bt_addr.h"
 #include <iostream>
 
-BtAddr::BtAddr() {
-    memset(&maddr, 0, sizeof(bdaddr_t));
+BtAddr::BtAddr(uint8_t fill) {
+    memset(&m_addr, fill, sizeof(bdaddr_t));
 }
 
 BtAddr::BtAddr(const std::string& addr) {
@@ -28,8 +28,8 @@ void BtAddr::getSockAddr(struct sockaddr_rc& sockaddr, uint8_t channel) const {
     memcpy(&sockaddr.rc_bdaddr, &m_addr, sizeof(sockaddr.rc_bdaddr));
 }
 
-std::vector<uint8_t> BtAddr::asBytes() {
-    std::vector<uint8_t> message
+std::vector<uint8_t> BtAddr::asBytes() const {
+    std::vector<uint8_t> message;
     for (size_t i = 0; i < sizeof(bdaddr_t); ++i) {
         message.push_back(m_addr.b[i]);
     }

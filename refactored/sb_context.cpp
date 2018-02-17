@@ -1,8 +1,7 @@
 #include "sb_context.h"
 #include "sb_message_ping.h"
+#include <iomanip>
 
-class SbContext {
-public:
 SbContext::SbContext(const BtAddr& addr): m_sbAddr(addr), m_connection(m_sbAddr) {
 }
 
@@ -34,25 +33,24 @@ SbContext SbContext::ping() {
     send(ping);
 }
 
-// std::ostream SbContext::dump(const std::vector<uint8_t>& msg, std::ostream& os) {
-// 	int i = 0;
-// 	for (uint8_t byte :  msg) {
-// 		os << "0x" << std::setfill('0') << std::setw(2) << std::hex << (int)byte << " ";
-// 		++ i;
-// 		if (i%8 == 0) os << std::endl;
-// 	}
-// 	if (i%8 != 0) os << std::endl;
-//     return os;
-// }
+static void dump(const std::vector<uint8_t>& msg, std::ostream& os) {
+    int i = 0;
+    for (uint8_t byte :  msg) {
+        os << "0x" << std::setfill('0') << std::setw(2) << std::hex << (int)byte << " ";
+        ++ i;
+        if (i%8 == 0) os << std::endl;
+    }
+    if (i%8 != 0) os << std::endl;
+}
 
 void SbContext::send(const SbMessage& message) {
-	std::cout << "Sending:" << message;
+    std::cout << "Sending:" << std::endl << message;
     m_connection.send(message.get());
 }
 
 std::vector<uint8_t> SbContext::receive() {
     std::vector<uint8_t> received = m_connection.receive();
-	std::cout << "Received:" << std::endl;
+    std::cout << "Received:" << std::endl;
     dump(received, std::cout);
     return received;
 }
@@ -174,21 +172,14 @@ std::vector<uint8_t> SbContext::receive() {
 
 // Needs to wait for command
 std::vector<uint8_t> SbContext::waitFor(uint8_t type) {
-	bool found = false;
-	std::vector<uint8_t> message;
-	while(!found) {
-		message = connection.receive();
-		std::cout << "Received:" << std::endl;
-		dump(message, std::cout);
-		found = (message[3] == type);
-	}
+    bool found = false;
+    std::vector<uint8_t> message;
+    while(!found) {
+        message = m_connection.receive();
+        std::cout << "Received:" << std::endl;
+        dump(message, std::cout);
+        found = (message[3] == type);
+    }
     return message;
 }
 
-
-private:
-    BtAddr       m_sbAddr;
-    uint8_t      m_invCode;
-    BtAddr       m_myAddr;
-    SbConnection m_connection;
-}

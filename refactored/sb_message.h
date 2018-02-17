@@ -1,3 +1,4 @@
+#pragma once
 #include "bt_addr.h"
 #include <vector>
 #include <iostream>
@@ -8,10 +9,9 @@ public:
 
     void finalize();
 
-    SbMessage operator+=(const std::vector<uint8_t> bytes);
-    SbMessage operator+=(const SbMessage& message);
-    SbMessage operator+=(const uint8_t byte);
-    SbMessage operator+=(const uint16_t short);
+    void push(const std::vector<uint8_t>& bytes);
+    void push(uint8_t value);
+    void push(uint16_t value);
     
     const std::vector<uint8_t>& get() const;
 
@@ -21,6 +21,3 @@ private:
     std::vector<uint8_t> m_message;
 };
 
-SbMessage operator+(SbMessage lhs, const std::vector<uint8_t> bytes);
-SbMessage operator+(SbMessage lhs, const SbMessage& message);
-SbMessage operator+(SbMessage lhs, const uint8_t byte);

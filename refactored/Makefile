@@ -1,7 +1,5 @@
-test: sb_context.o sb_connection.o bt_addr.o main.o
-	g++ -g sb_context.o sb_connection.o bt_addr.o main.o -Wall -lbluetooth -o test
-sb_context.o: sb_context.cpp sb_context.h
-	g++  $(INC) -g -c sb_context.cpp
+test: sb_context.o sb_connection.o bt_addr.o main.o sb_message.o sb_message_ping.o
+	g++ -g sb_context.o sb_connection.o bt_addr.o main.o sb_message.o sb_message_ping.o -Wall -lbluetooth -o test
 sb_connection.o: sb_connection.cpp sb_connection.h bt_addr.h
 	g++  $(INC) -g -c sb_connection.cpp
 sb_context.o: sb_context.cpp sb_context.h bt_addr.h

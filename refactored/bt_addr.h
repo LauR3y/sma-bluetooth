@@ -6,7 +6,7 @@
 
 class BtAddr {
 public:
-    BtAddr();
+    BtAddr(uint8_t fill = 0);
     BtAddr(const std::string& addr);
     BtAddr(const std::vector<uint8_t>& buffer, size_t offset=0);
 

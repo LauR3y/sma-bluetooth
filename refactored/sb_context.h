@@ -1,5 +1,7 @@
+#pragma once
 #include "bt_addr.h"
 #include "sb_connection.h"
+#include "sb_message.h"
 
 class SbContext {
 public:
@@ -9,7 +11,7 @@ public:
     SbContext connect();
     SbContext ping();
 
-    void send(const std::vector<uint8_t>& message);
+    void send(const SbMessage& message);
     std::vector<uint8_t> receive();
 
     // Needs to wait for command
@@ -20,4 +22,5 @@ private:
     uint8_t      m_invCode;
     BtAddr       m_myAddr;
     SbConnection m_connection;
-}
+};
+
