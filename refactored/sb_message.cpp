@@ -2,14 +2,33 @@
 #include <iostream>
 #include <iomanip>
 
-SbMessage::SbMessage(uint16_t command, const BtAddr& addr1, const BtAddr& addr2) {
+Command SbMessage::getCommandFromBytes(const std::vector<uint8_t>& bytes) {
+    return (bytes[16] << 8) + bytes[17];
+}
+
+SbMessage SbMessage::fromBytes(const std::vector<uint8_t>& bytes) {
+    Command cmd = getCommandFromBytes(bytes);
+    switch(cmd) {
+        case Ping: return SbMessagePing(bytes);
+        case Request: return SbMessageRequest(bytes);
+        default: return SbMessage(bytes);
+    }
+}
+
+SbMessage::SbMessage(uint16_t command, const BtAddr& to, const BtAddr& from) : m_command(command), m_to(to), m_from(from) {
     m_message.push_back(0x7e); // Always 0x7e
     m_message.push_back(0x00); // Length sent in finish
     m_message.push_back(0x00);
     m_message.push_back(0x00); // XOR of bytes 0..3
-    push(addr1.asBytes());
-    push(addr2.asBytes());
+    push(to.asBytes());
+    push(from.asBytes());
     push(command);
+}
+
+SbMessage::SbMessage(const std::vector<uint8_t>& bytes) : m_message(bytes) {
+    m_command = (bytes[14] << 8) + bytes[15];
+    m_to = BtAddr(bytes, 4);
+    m_from = BtAddr(bytes, 10);
 }
 
 void SbMessage::finalize() {

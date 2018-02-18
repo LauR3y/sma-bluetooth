@@ -20,6 +20,10 @@ int main(int argc, const char* argv[]) {
 	SbContext context(addr);
 	context.connect();
 	context.ping();
+	SbMessage ping = context.waitFor(Ping);
+	context.updateMyAddr(ping);
+	context.request();
+	SbMessage response = context.waitFor(Response);
 
 	// // Read first message
 	// std::vector<uint8_t> init = context.receive();

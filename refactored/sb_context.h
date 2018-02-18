@@ -10,12 +10,13 @@ public:
 
     SbContext connect();
     SbContext ping();
+    SbContext request();
+
+    void updateMyAddr(const SbMessage& message);
 
     void send(const SbMessage& message);
-    std::vector<uint8_t> receive();
-
-    // Needs to wait for command
-    std::vector<uint8_t> waitFor(uint8_t type);
+    SbMessage receive();
+    SbMessage waitFor(Command command);
         
 private:
     BtAddr       m_sbAddr;

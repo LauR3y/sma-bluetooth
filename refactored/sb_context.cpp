@@ -11,9 +11,8 @@ SbContext::SbContext(const std::string& addr): m_sbAddr(addr), m_connection(m_sb
 
 SbContext SbContext::connect() {
     std::vector<uint8_t> received = receive();
-
     m_invCode = received[22];
-    // send(buildMessage61());
+    return *this;
 
     // received = waitFor(0x5C);
 
@@ -31,6 +30,13 @@ SbContext SbContext::connect() {
 SbContext SbContext::ping() {
     SbMessagePing ping(m_sbAddr, m_invCode);
     send(ping);
+    return *this;
+}
+
+SbContext SbContext::request() {
+    SbMessageRequest request(m_sbAddr);
+    send(request);
+    return *this;
 }
 
 static void dump(const std::vector<uint8_t>& msg, std::ostream& os) {
@@ -48,11 +54,28 @@ void SbContext::send(const SbMessage& message) {
     m_connection.send(message.get());
 }
 
-std::vector<uint8_t> SbContext::receive() {
+SbMessage SbContext::receive() {
     std::vector<uint8_t> received = m_connection.receive();
     std::cout << "Received:" << std::endl;
     dump(received, std::cout);
-    return received;
+    return SbMessage.fromBytes(received);
+}
+
+SbMessage SbContext::waitFor(Command command) {
+    bool found = false;
+    std::vector<uint8_t> message;
+    while(!found) {
+        message = m_connection.receive();
+        std::cout << "Received:" << std::endl;
+        dump(message, std::cout);
+        Command cmd = getCommandFromBytes(message);
+        found = (cmd == command);
+    }
+    return SbMessage.fromBytes(message);
+}
+
+void SbContext::updateMyAddr(const SbMessage& message) {
+    m_myAddr = message.getTo();
 }
 
 // SbMessage SbContext::buildMessage61() {
@@ -171,15 +194,4 @@ std::vector<uint8_t> SbContext::receive() {
 // }
 
 // Needs to wait for command
-std::vector<uint8_t> SbContext::waitFor(uint8_t type) {
-    bool found = false;
-    std::vector<uint8_t> message;
-    while(!found) {
-        message = m_connection.receive();
-        std::cout << "Received:" << std::endl;
-        dump(message, std::cout);
-        found = (message[3] == type);
-    }
-    return message;
-}
 
