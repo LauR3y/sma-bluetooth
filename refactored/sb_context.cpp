@@ -51,30 +51,27 @@ static void dump(const std::vector<uint8_t>& msg, std::ostream& os) {
 }
 
 void SbContext::send(const SbMessage& message) {
-    std::cout << "Sending:" << std::endl << message << std::endl;
+    std::cout << "Sending: " << "0x" << std::hex << std::setw(4) << message.getCommand() << std::endl << message << std::endl;
     m_connection.send(message.get());
 }
 
 SbMessage SbContext::receive() {
     std::vector<uint8_t> received = m_connection.receive();
-    std::cout << "Received:" << std::endl;
-    dump(received, std::cout);
-    return SbMessage::fromBytes(received);
+    SbMessage message = SbMessage::fromBytes(received);
+    std::cout << "Received: " << "0x" << std::hex << std::setw(4) << message.getCommand() << std::endl << message << std::endl;
+    return message;
 }
 
 SbMessage SbContext::waitFor(Command command) {
     bool found = false;
-    std::vector<uint8_t> message;
     std::cout << "Waiting for " << "0x" << std::setw(4) << (int) command << std::endl;
+    SbMessage message;
     while(!found) {
-        message = m_connection.receive();
-        std::cout << "Received:" << std::endl;
-        dump(message, std::cout);
-        Command cmd = SbMessage::getCommandFromBytes(message);
-	std::cout << "Found " << "0x" << std::setw(4) << (int) cmd << std::endl;
-        found = (cmd == command);
+        message = receive();
+	std::cout << "Found " << "0x" << std::setw(4) << message.getCommand() << std::endl;
+        found = (message.getCommand() == command);
     }
-    return SbMessage::fromBytes(message);
+    return message;
 }
 
 void SbContext::updateMyAddr(const SbMessage& message) {

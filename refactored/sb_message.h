@@ -12,7 +12,8 @@ enum Command {
     Error     = 0x0700,
     L2Segment = 0x0800,
     Login2    = 0x0A00,
-    Login3    = 0x0C00
+    Login3    = 0x0C00,
+    Unknown   = 0xFFFF
 };
 
 class SbMessage {
@@ -22,6 +23,7 @@ public:
 
     SbMessage(Command command, const BtAddr& to, const BtAddr& from);
     SbMessage(const std::vector<uint8_t>& bytes);
+    SbMessage() {};
 
     void finalize();
 
@@ -41,7 +43,7 @@ public:
 
 private:
     std::vector<uint8_t> m_message;
-    Command m_command;
+    Command m_command = Unknown;
     BtAddr m_to;
     BtAddr m_from;
 };
