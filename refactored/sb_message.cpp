@@ -1,9 +1,11 @@
 #include "sb_message.h"
+#include "sb_message_ping.h"
+#include "sb_message_request.h"
 #include <iostream>
 #include <iomanip>
 
 Command SbMessage::getCommandFromBytes(const std::vector<uint8_t>& bytes) {
-    return (bytes[16] << 8) + bytes[17];
+    return static_cast<Command>((bytes[16] << 8) + bytes[17]);
 }
 
 SbMessage SbMessage::fromBytes(const std::vector<uint8_t>& bytes) {
@@ -15,18 +17,18 @@ SbMessage SbMessage::fromBytes(const std::vector<uint8_t>& bytes) {
     }
 }
 
-SbMessage::SbMessage(uint16_t command, const BtAddr& to, const BtAddr& from) : m_command(command), m_to(to), m_from(from) {
+SbMessage::SbMessage(Command command, const BtAddr& to, const BtAddr& from) : m_command(command), m_to(to), m_from(from) {
     m_message.push_back(0x7e); // Always 0x7e
     m_message.push_back(0x00); // Length sent in finish
     m_message.push_back(0x00);
     m_message.push_back(0x00); // XOR of bytes 0..3
-    push(to.asBytes());
     push(from.asBytes());
+    push(to.asBytes());
     push(command);
 }
 
 SbMessage::SbMessage(const std::vector<uint8_t>& bytes) : m_message(bytes) {
-    m_command = (bytes[14] << 8) + bytes[15];
+    m_command = getCommandFromBytes(bytes);
     m_to = BtAddr(bytes, 4);
     m_from = BtAddr(bytes, 10);
 }
@@ -44,10 +46,9 @@ void SbMessage::push(uint8_t byte) {
     m_message.push_back(byte);
 }
 
-void SbMessage::push(uint16_t value) {
-    uint16_t v = htons(value);
-    m_message.push_back((v&0xff00)>>8);
-    m_message.push_back((v&0x0ff));
+void SbMessage::push(Command command) {
+    m_message.push_back((command&0xff00)>>8);
+    m_message.push_back((command&0x0ff));
 }
 
 const std::vector<uint8_t>& SbMessage::get() const {

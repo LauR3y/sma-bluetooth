@@ -3,6 +3,6 @@
 
 class SbMessagePing : public SbMessage {
 public:
-    SbMessagePing(const BtAddr& to);
-    SbMessagePing(const std::vector<uint8_t>& bytes);
+    SbMessagePing(const BtAddr& to, uint8_t invCode);
+    SbMessagePing(const std::vector<uint8_t>& bytes): SbMessage(bytes) {}
 };

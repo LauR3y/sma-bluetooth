@@ -3,6 +3,6 @@
 
 class SbMessageRequest : public SbMessage {
 public:
-    SbMessageRequest(const BtAddr& to, uint8_t invCode);
-    SbMessageRequest(const std::vector<uint8_t>& bytes);
+    SbMessageRequest(const BtAddr& to);
+    SbMessageRequest(const std::vector<uint8_t>& bytes) : SbMessage(bytes) {}
 };

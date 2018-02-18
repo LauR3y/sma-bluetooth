@@ -21,17 +21,19 @@ public:
     static SbMessage fromBytes(const std::vector<uint8_t>& bytes);
 
     SbMessage(Command command, const BtAddr& to, const BtAddr& from);
-    SbMessage(const std::vector<uint8_t> bytes);
+    SbMessage(const std::vector<uint8_t>& bytes);
 
     void finalize();
 
     void push(const std::vector<uint8_t>& bytes);
     void push(uint8_t value);
-    void push(uint16_t value);
+    void push(Command value);
     
     const std::vector<uint8_t>& get() const;
 
     friend std::ostream& operator<< (std::ostream& os, const SbMessage& message);
+
+    uint8_t operator[](size_t i) const { return m_message[i]; }
 
     const BtAddr& getFrom() const { return m_from; }
     const BtAddr& getTo() const { return m_to; }

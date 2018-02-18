@@ -1,4 +1,4 @@
-test: sb_context.o sb_connection.o bt_addr.o main.o sb_message.o sb_message_ping.o
+test: sb_context.o sb_connection.o bt_addr.o main.o sb_message.o sb_message_ping.o sb_message_request.o
 	g++ -g sb_context.o sb_connection.o bt_addr.o main.o sb_message.o sb_message_ping.o sb_message_request.o -Wall -lbluetooth -o test
 sb_connection.o: sb_connection.cpp sb_connection.h bt_addr.h
 	g++  $(INC) -g -c sb_connection.cpp

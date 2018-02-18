@@ -28,7 +28,7 @@ std::vector<uint8_t> SbConnection::receive() {
     struct timeval tv;
     fd_set readfds;
 
-    tv.tv_sec = 5;
+    tv.tv_sec = 10;
     tv.tv_usec = 0;
     bool finished = false;
     int bytesToRead = 4;
