@@ -64,13 +64,13 @@ SbMessage SbContext::receive() {
 
 SbMessage SbContext::waitFor(Command command) {
     bool found = false;
-    std::cout << "Waiting for " << "0x" << std::setw(4) << (int) command << std::endl;
     SbMessage message;
     while(!found) {
+	std::cout << "Waiting for " << "0x" << std::setw(4) << (int) command << std::endl;
         message = receive();
-	std::cout << "Found " << "0x" << std::setw(4) << message.getCommand() << std::endl;
         found = (message.getCommand() == command);
     }
+    std::cout << "Found " << "0x" << std::setw(4) << message.getCommand() << std::endl;
     return message;
 }
 

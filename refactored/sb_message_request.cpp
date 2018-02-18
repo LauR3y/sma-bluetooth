@@ -2,4 +2,5 @@
 
 SbMessageRequest::SbMessageRequest(const BtAddr& to): SbMessage(Request, to, BtAddr()) {
     push(std::vector<uint8_t>({0x05, 0x00}));
+    finalize();
 }
