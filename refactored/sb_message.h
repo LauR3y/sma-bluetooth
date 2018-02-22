@@ -1,6 +1,6 @@
 #pragma once
 #include "bt_addr.h"
-#include <vector>
+#include "message_bytes.h"
 #include <iostream>
 
 enum Command {
@@ -16,7 +16,7 @@ enum Command {
     Unknown   = 0xFFFF
 };
 
-class SbMessage {
+class SbMessage : public MessageBytes {
 public:
     static Command getCommandFromBytes(const std::vector<uint8_t>& bytes);
     static SbMessage fromBytes(const std::vector<uint8_t>& bytes);
@@ -27,22 +27,13 @@ public:
 
     void finalize();
 
-    void push(const std::vector<uint8_t>& bytes);
-    void push(uint8_t value);
     void push(Command value);
-    
-    const std::vector<uint8_t>& get() const;
-
-    friend std::ostream& operator<< (std::ostream& os, const SbMessage& message);
-
-    uint8_t operator[](size_t i) const { return m_message[i]; }
 
     const BtAddr& getFrom() const { return m_from; }
     const BtAddr& getTo() const { return m_to; }
     const Command& getCommand() const { return m_command; }
 
 private:
-    std::vector<uint8_t> m_message;
     Command m_command = Unknown;
     BtAddr m_to;
     BtAddr m_from;
