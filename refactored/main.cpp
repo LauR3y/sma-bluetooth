@@ -26,12 +26,12 @@ int main(int argc, const char* argv[]) {
 	context.updateMyAddr(login1);
 
 	context.request();
-	response = context.waitFor(Response);
+	SbMessage response = context.waitFor(Response);
 	double signalStrength = (response[22] * 100) / 0xff;
 	std::cout << "Signal Strength: " << std::dec << signalStrength << "%" << std::endl;
 
-	std::vector<uint8_t> mySusyId(std::vector<uint8_t>({rand()%0xff, rand()%0xff}));
-	std::vector<uint8_t> mySerial(std::vector<uint8_t>({rand()%0xff, rand()%0xff, rand()%0xff, rand()%0xff}));
+	MessageBytes mySusyId((uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff));
+	MessageBytes mySerial((uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff));
 	
 	// Send L2 Packet
 

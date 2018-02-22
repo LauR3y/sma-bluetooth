@@ -23,11 +23,9 @@ public:
 
     SbMessage(Command command, const BtAddr& to, const BtAddr& from);
     SbMessage(const std::vector<uint8_t>& bytes);
-    SbMessage() {};
+    SbMessage(): MessageBytes() {}
 
     void finalize();
-
-    void push(Command value);
 
     const BtAddr& getFrom() const { return m_from; }
     const BtAddr& getTo() const { return m_to; }

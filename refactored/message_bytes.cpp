@@ -6,7 +6,7 @@ MessageBytes::MessageBytes(const std::vector<uint8_t>& bytes) : m_message(bytes)
 }
 
 MessageBytes::MessageBytes(uint8_t value) {
-    push(value);
+    pushByte(value);
 }
 
 MessageBytes::MessageBytes(uint8_t value1, uint8_t value2) {
@@ -29,15 +29,16 @@ MessageBytes::MessageBytes(uint8_t value1, uint8_t value2, uint8_t value3, uint8
     push(value1, value2, value3, value4, value5, value6);
 } 
 
-MessageBytes::MessageBytes(uint16_t value) {
-    push(value);
-}
 
 void MessageBytes::push(const std::vector<uint8_t>& bytes) {
     m_message.insert(m_message.end(), bytes.begin(), bytes.end());
 }
 
-void MessageBytes::push(uint8_t byte) {
+void MessageBytes::push(const MessageBytes& bytes) {
+    m_message.insert(m_message.end(), bytes.m_message.begin(), bytes.m_message.end());
+}
+
+void MessageBytes::pushByte(uint8_t byte) {
     m_message.push_back(byte);
 }
 
@@ -61,12 +62,12 @@ void MessageBytes::push(uint8_t value1, uint8_t value2, uint8_t value3, uint8_t 
     push(std::vector<uint8_t>({value1, value2, value3, value4, value5, value6}));
 }
 
-void MessageBytes::push(uint16_t word) {
+void MessageBytes::pushWord(uint16_t word) {
     m_message.push_back((word&0xff00)>>8);
     m_message.push_back((word&0x0ff));
 }
 
-void MessageBytes::push(uint32_t word) {
+void MessageBytes::pushLong(uint32_t word) {
     m_message.push_back((uint8_t)((word&0xff000000)>>24));
     m_message.push_back((uint8_t)((word&0x00ff0000)>>16));
     m_message.push_back((uint8_t)((word&0x0000ff00)>>8));
