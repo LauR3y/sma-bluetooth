@@ -75,7 +75,10 @@ SbMessage SbContext::waitFor(Command command) {
 }
 
 void SbContext::updateMyAddr(const SbMessage& message) {
-    m_myAddr = message.getTo();
+    m_myAddr = BtAddr(message.get(), 0x1A);
+    std::cout << "MyAddr:" << std::endl;
+    dump(m_myAddr.asBytes(), std::cout);
+    std::cout << std::endl;
 }
 
 // SbMessage SbContext::buildMessage61() {

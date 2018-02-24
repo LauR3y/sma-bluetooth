@@ -13,6 +13,7 @@ public:
     SbContext request();
 
     void updateMyAddr(const SbMessage& message);
+    const BtAddr& getMyAddr() const { return m_myAddr; }
 
     void send(const SbMessage& message);
     SbMessage receive();

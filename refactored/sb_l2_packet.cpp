@@ -33,7 +33,7 @@ private:
     static Fcs16* m_instance;
 };
 
-Fcs16* Fsc16::m_instance = 0;
+Fcs16* Fcs16::m_instance = 0;
 
 SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password) {
     pushByte(0x7E);
@@ -68,5 +68,5 @@ SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySeria
 }
 
 uint16_t SbL2Packet::calculateFCS() {
-    return Fcs16::instance().calculateFCS(m_message.data(), m_message.length());
+    return Fcs16::instance().calculateFCS(m_message.data(), m_message.size());
 }
