@@ -38,6 +38,7 @@ Fcs16* Fcs16::m_instance = 0;
 SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password) {
     pushByte(0x7E);
     push(0xFF, 0x03, 0x60, 0x65);
+    pushByte(0x0E); // length
     pushByte(0xA0);
     push(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
     pushByte(0x00);
@@ -57,13 +58,13 @@ SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySeria
         push(0x07, 0x00, 0x00, 0x00, 0x84, 0x03);
         push(0x00, 0x00);
         time_t t = time(NULL);
-        push((uint32_t)t);
+        pushLong((uint32_t)t);
         push(0x00, 0x00, 0x00, 0x00);   // ??
         for (int i = 0; i < 12; ++ i) { //   $PASSWORD   12 chars xored with 0x88
             uint8_t byte = i < password.length() ? password[i] : 0;
             push(byte ^ 0x88);
         }
-        push(calculateFCS());           //   $CRC
+        pushWord(calculateFCS());           //   $CRC
     pushByte(0x7E);                     // Termination
 }
 
