@@ -4,5 +4,7 @@
 
 class SbL2Packet : public MessageBytes {
 public:
-    SbL2Packet(const BtAddr& to, const BtAddr& from, const MessageBytes& mySusyId, const MessageBytes& mySerial);    
+    SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password);   
+private:
+    uint16_t calculateFCS();
 };
