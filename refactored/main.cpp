@@ -37,7 +37,7 @@ int main(int argc, const char* argv[]) {
 	
 	// Send L2 Packet
 	SbL2Packet login(mySusyId, mySerial, "0000");
-	context.send(SbMessageL2(context.getMyAddr(), login).finalize());
+	context.send(SbMessageL2(context.getMyAddr(), login.finalize()));
 	response = context.waitFor(L2Packet);
 
 	// S 7E 54 00 2A $ADD2 FF FF FF FF FF FF 01 00 7E FF 03 60 65 0E A0 FF FF FF FF FF FF 00 01 $MYSUSYID $MYSERIAL 00 01 00 00 00 00 $CNT 80 0C 04 FD FF 07 00 00 00 84 03 00 00 $TIME 00 00 00 00 $PASSWORD $CRC 7E $END;

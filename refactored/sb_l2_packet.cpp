@@ -76,11 +76,12 @@ SbL2Packet::SbL2Packet(
         }
 }
 
-void SbL2Packet::finalize() {
+SbL2Packet& SbL2Packet::finalize() {
     uint16_t fcsCheck = calculateFCS();
     pushWord(fcsCheck);       // $CRC
     addEscapes();
     pushByte(0x7E);           // Termination
+    return *this;
 }
 
 void SbL2Packet::addEscapes() {
@@ -92,7 +93,7 @@ void SbL2Packet::addEscapes() {
             case 0x12:
             case 0x13:
                 m_message[i] = m_message[i] ^ 0x20;
-                m_message.insert(i, 0x7d);
+                m_message.insert(i, (uint8_t)0x7d);
                 ++ i;
                 break;
         }

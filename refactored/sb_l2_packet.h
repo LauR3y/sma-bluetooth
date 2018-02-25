@@ -5,7 +5,7 @@
 class SbL2Packet : public MessageBytes {
 public:
     SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password);   
-    void finalize();
+    SbL2Packet& finalize();
 
 private:
     void addEscapes();
