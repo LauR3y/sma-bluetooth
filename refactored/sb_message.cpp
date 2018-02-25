@@ -5,7 +5,7 @@
 #include <iomanip>
 
 Command SbMessage::getCommandFromBytes(const std::vector<uint8_t>& bytes) {
-    return static_cast<Command>((bytes[16] << 8) + bytes[17]);
+    return static_cast<Command>((bytes[17] << 8) + bytes[16]);
 }
 
 SbMessage SbMessage::fromBytes(const std::vector<uint8_t>& bytes) {

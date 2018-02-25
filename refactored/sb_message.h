@@ -4,15 +4,15 @@
 #include <iostream>
 
 enum Command {
-    L2Packet  = 0x0100,
-    Ping      = 0x0200,
-    Request   = 0x0300,
-    Response  = 0x0400,
-    Login1    = 0x0500,
-    Error     = 0x0700,
-    L2Segment = 0x0800,
-    Login2    = 0x0A00,
-    Login3    = 0x0C00,
+    L2Packet  = 0x0001,
+    Ping      = 0x0002,
+    Request   = 0x0003,
+    Response  = 0x0004,
+    Login1    = 0x0005,
+    Error     = 0x0007,
+    L2Segment = 0x0008,
+    Login2    = 0x000A,
+    Login3    = 0x000C,
     Unknown   = 0xFFFF
 };
 

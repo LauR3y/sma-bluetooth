@@ -38,33 +38,33 @@ Fcs16* Fcs16::m_instance = 0;
 SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password) {
     pushByte(0x7E);
     push(0xFF, 0x03, 0x60, 0x65);
-    pushByte(0x0E); // length
+    pushByte(0x0E);    // length   TODO
     pushByte(0xA0);
     push(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
     pushByte(0x00);
     pushByte(0x01);
     push(mySusyId);
     push(mySerial);
-    push(0x00, 0x01); // ??
-    pushByte(0x00);                               // Ack 0x00
-    pushByte(0x00);                               // ??
-    pushByte(0x00);                               // Telegram Number
-    pushByte(0x00);                               // ??
-    pushByte(0x00);                               // $CNT Counter
-    pushByte(0x80);                               // Command Group 1
-    pushByte(0x0C);                               // Command Group 2
-    pushByte(0x04);                               // Command Group 3
-    push(0xFD, 0xFF);  // Command = Login
+    push(0x00, 0x01);  // ??
+    pushByte(0x00);    // Ack 0x00
+    pushByte(0x00);    // ??
+    pushByte(0x00);    // Telegram Number
+    pushByte(0x00);    // ??
+    pushByte(0x05);    // $CNT Counter   TODO
+    pushByte(0x80);    // Command Group 1
+    pushByte(0x0C);    // Command Group 2
+    pushByte(0x04);    // Command Group 3
+    pushWord(0xFFFD);  // Command = Login
         push(0x07, 0x00, 0x00, 0x00, 0x84, 0x03);
         push(0x00, 0x00);
         time_t t = time(NULL);
         pushLong((uint32_t)t);
         push(0x00, 0x00, 0x00, 0x00);   // ??
-        for (int i = 0; i < 12; ++ i) { //   $PASSWORD   12 chars xored with 0x88
+        for (int i = 0; i < 12; ++ i) { // $PASSWORD   12 chars xored with 0x88
             uint8_t byte = i < password.length() ? password[i] : 0;
             push(byte ^ 0x88);
         }
-        pushWord(calculateFCS());           //   $CRC
+        pushWord(calculateFCS());       // $CRC
     pushByte(0x7E);                     // Termination
 }
 

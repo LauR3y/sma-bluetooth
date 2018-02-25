@@ -63,15 +63,15 @@ void MessageBytes::push(uint8_t value1, uint8_t value2, uint8_t value3, uint8_t 
 }
 
 void MessageBytes::pushWord(uint16_t word) {
-    m_message.push_back((word&0xff00)>>8);
     m_message.push_back((word&0x0ff));
+    m_message.push_back((word&0xff00)>>8);
 }
 
 void MessageBytes::pushLong(uint32_t word) {
-    m_message.push_back((uint8_t)((word&0xff000000)>>24));
-    m_message.push_back((uint8_t)((word&0x00ff0000)>>16));
-    m_message.push_back((uint8_t)((word&0x0000ff00)>>8));
     m_message.push_back((uint8_t)((word&0x000000ff)));
+    m_message.push_back((uint8_t)((word&0x0000ff00)>>8));
+    m_message.push_back((uint8_t)((word&0x00ff0000)>>16));
+    m_message.push_back((uint8_t)((word&0xff000000)>>24));
 }
 
 const std::vector<uint8_t>& MessageBytes::get() const {
