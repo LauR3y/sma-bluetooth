@@ -51,14 +51,14 @@ static void dump(const std::vector<uint8_t>& msg, std::ostream& os) {
 }
 
 void SbContext::send(const SbMessage& message) {
-    std::cout << "Sending: " << "0x" << std::hex << std::setw(4) << message.getCommand() << std::endl << message << std::endl;
+    std::cout << "Sending: " << "0x" << std::hex << std::setfill('0') << std::setw(4) << message.getCommand() << std::endl << message << std::endl;
     m_connection.send(message.get());
 }
 
 SbMessage SbContext::receive() {
     std::vector<uint8_t> received = m_connection.receive();
     SbMessage message = SbMessage::fromBytes(received);
-    std::cout << "Received: " << "0x" << std::hex << std::setw(4) << message.getCommand() << std::endl << message << std::endl;
+    std::cout << "Received: " << "0x" << std::hex << std::setw(4) << std::setfill('0') << message.getCommand() << std::endl << message << std::endl;
     return message;
 }
 

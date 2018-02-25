@@ -1,4 +1,5 @@
 #include "sb_l2_packet.h"
+#include <iomanip>
 
 class Fcs16 {
 public:
@@ -35,9 +36,18 @@ private:
 
 Fcs16* Fcs16::m_instance = 0;
 
-SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySerial, const std::string& password) {
+SbL2Packet::SbL2Packet(
+	const MessageBytes& mySusyId,
+       	const MessageBytes& mySerial,
+       	const std::string& password
+) {
+    // See RFC 1662 for details of basic frame format
+    // +--------+--------+--------+----------------+------+------+---------+--------+
+    // |  FLAG  |  ADDR  |  CTRL  |     PROTOCOL   | Info | Padd |   FCS   |  FLAG  |
+    // |01111110|11111111|00000011|     16 bits    |  **  |  **  | 16 bits |01111110|
+    // +--------+--------+--------+----------------+------+------+---------+--------+
     pushByte(0x7E);
-    push(0xFF, 0x03, 0x60, 0x65);
+    push(0xFF, 0x03, 0x60, 0x65); // Protocol 0x6560 -> no assocaited Network Control Protocol (RFC 1661)
     pushByte(0x0E);    // length   TODO
     pushByte(0xA0);
     push(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -50,7 +60,7 @@ SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySeria
     pushByte(0x00);    // ??
     pushByte(0x00);    // Telegram Number
     pushByte(0x00);    // ??
-    pushByte(0x05);    // $CNT Counter   TODO
+    pushByte(0x03);    // $CNT Counter   TODO
     pushByte(0x80);    // Command Group 1
     pushByte(0x0C);    // Command Group 2
     pushByte(0x04);    // Command Group 3
@@ -64,10 +74,20 @@ SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySeria
             uint8_t byte = i < password.length() ? password[i] : 0;
             push(byte ^ 0x88);
         }
-        pushWord(calculateFCS());       // $CRC
-    pushByte(0x7E);                     // Termination
+}
+
+void SbL2Packet::finalize() {
+    uint16_t fcsCheck = calculateFCS();
+    pushWord(fcsCheck);       // $CRC
+    addEscapes();
+    pushByte(0x7E);           // Termination
+}
+
+void SbL2Packet::addEscapes() {
 }
 
 uint16_t SbL2Packet::calculateFCS() {
-    return Fcs16::instance().calculateFCS(m_message.data(), m_message.size());
+    // RFC 1662 FCS is calculated over all bits of Address, Control, 
+    // Protocol, Information and Padding fields (so NOT FLAG at start)
+    return Fcs16::instance().calculateFCS(m_message.data() + 1, m_message.size() - 1);
 }
