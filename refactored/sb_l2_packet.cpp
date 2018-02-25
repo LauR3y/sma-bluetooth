@@ -59,7 +59,7 @@ SbL2Packet::SbL2Packet(const MessageBytes& mySusyId, const MessageBytes& mySeria
         push(0x00, 0x00);
         time_t t = time(NULL);
         pushLong((uint32_t)t);
-        push(0x00, 0x00, 0x00, 0x00);   // ??
+        pushLong(0x00);   // ??
         for (int i = 0; i < 12; ++ i) { // $PASSWORD   12 chars xored with 0x88
             uint8_t byte = i < password.length() ? password[i] : 0;
             push(byte ^ 0x88);
