@@ -85,16 +85,18 @@ SbL2Packet& SbL2Packet::finalize() {
 }
 
 void SbL2Packet::addEscapes() {
-    for (size_t i = 1; i < m_message.size(); ++ i) {
-        switch(m_message[i]) {
+    const uint8_t escape = 0x7d;
+    for (std::vector<uint8_t>::iterator it = m_message.begin() + 1;
+	 it != m_message.end();
+	 it ++) {
+        switch(*it) {
             case 0x7d:
             case 0x7e:
             case 0x11:
             case 0x12:
             case 0x13:
-                m_message[i] = m_message[i] ^ 0x20;
-                m_message.insert(i, (uint8_t)0x7d);
-                ++ i;
+                *it = *it ^ 0x20;
+                it = m_message.insert(it, escape);
                 break;
         }
     }

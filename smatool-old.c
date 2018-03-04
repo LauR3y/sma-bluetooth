@@ -2304,6 +2304,12 @@ int main(int argc, char **argv)
             }
             printf(" cc=%d", cc);
             printf("\n\n");
+	    for (int xx=0; xx < cc; ++xx) {
+		if (xx%8 != 0) printf(", ");
+		printf("0x%02x", fl[xx]);
+		if (xx%8 == 7) printf("\n");
+	    }
+	    printf("\n");
           }
           last_sent =
               (unsigned char *)realloc(last_sent,
