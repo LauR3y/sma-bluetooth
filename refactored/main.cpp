@@ -32,6 +32,12 @@ int main(int argc, const char* argv[]) {
 	double signalStrength = (response[22] * 100) / 0xff;
 	std::cout << "Signal Strength: " << std::dec << signalStrength << "%" << std::endl;
 
+	context.request();
+	response = context.waitFor(Response);
+
+	context.request();
+	response = context.waitFor(Response);
+
 	MessageBytes mySusyId((uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff));
 	MessageBytes mySerial((uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff), (uint8_t)(rand()%0xff));
 	

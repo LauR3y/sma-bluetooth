@@ -60,7 +60,7 @@ SbL2Packet::SbL2Packet(
     pushByte(0x00);    // ??
     pushByte(0x00);    // Telegram Number
     pushByte(0x00);    // ??
-    pushByte(0x03);    // $CNT Counter   TODO
+    pushByte(0x05);    // $CNT Counter   TODO
     pushByte(0x80);    // Command Group 1
     pushByte(0x0C);    // Command Group 2
     pushByte(0x04);    // Command Group 3
