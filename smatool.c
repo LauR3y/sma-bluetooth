@@ -26,6 +26,7 @@
 #include <bluetooth/rfcomm.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include <time.h>
 #include <assert.h>
