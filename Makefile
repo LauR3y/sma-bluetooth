@@ -1,7 +1,7 @@
 ARCH := $(shell getconf LONG_BIT)
 C_FLAGS_64 := -L/usr/lib64/mysql -I/usr/include/libxml2
 C_FLAGS_32 := -L/usr/lib/mysql
-INC = -I/usr/include/libxml2
+INC := -I/usr/include/libxml2
 
 
 smatool: smatool.o repost.o sma_mysql.o almanac.o sb_commands.o sma_struct.h
