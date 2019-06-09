@@ -20,6 +20,8 @@
 
 #define DATELENGTH 18
 
+#include <time.h>
+
 typedef struct{
     unsigned int 	key1;
     unsigned int 	key2;
