@@ -24,12 +24,18 @@
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#include <errno.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include <time.h>
 #include <assert.h>
 #include <sys/types.h>
 #include <curl/curl.h>
+#include "repost.h"
+#include "sma_mysql.h"
+#include <libxml2/libxml/parser.h>
+#include <libxml2/libxml/xpath.h>
 
 /*
  * u16 represents an unsigned 16-bit number.  Adjust the typedef for
