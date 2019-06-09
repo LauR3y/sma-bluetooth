@@ -5,7 +5,7 @@ INC := -I/usr/include/libxml2
 
 
 smatool: smatool.o repost.o sma_mysql.o almanac.o sb_commands.o sma_struct.h
-	gcc smatool.o repost.o sma_mysql.o almanac.o sb_commands.o -D_GNU_SOURCE -fstack-protector-all -O2 -Wall $(C_FLAGS_$(ARCH)) -lxml2 -lmysqlclient -lbluetooth -lcurl -lm -o smatool 
+	gcc smatool.o repost.o sma_mysql.o almanac.o sb_commands.o -D_GNU_SOURCE -fstack-protector-all -O2 -Wall $(C_FLAGS_$(ARCH)) -lxml2 -lmariadb -lbluetooth -lcurl -lm -o smatool 
 smatool.o: smatool.c sma_mysql.h
 	gcc -O2 $(INC) -D_GNU_SOURCE -c smatool.c
 repost.o: repost.c sma_mysql.h
