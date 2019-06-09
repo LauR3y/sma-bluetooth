@@ -1,4 +1,4 @@
-#include <mariadb/mysql.h>
+#include <mysql/mysql.h>
 
 extern MYSQL *conn;
 extern MYSQL_RES *res;
