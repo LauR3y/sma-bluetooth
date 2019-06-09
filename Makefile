@@ -3,7 +3,8 @@ C_FLAGS_64 := -L/usr/lib64/mysql -I/usr/include/libxml2
 C_FLAGS_32 := -L/usr/lib/mysql
 INC := -I/usr/include/libxml2
 
-
+smatool-old: smatool-old.o
+	gcc smatool-old.o -O2 -Wall $(C_FLAGS_$(ARCH)) -lxml2 -lmysqlclient -lbluetooth -lcurl -lm -o smatool-old
 smatool: smatool.o repost.o sma_mysql.o almanac.o sb_commands.o sma_struct.h
 	gcc smatool.o repost.o sma_mysql.o almanac.o sb_commands.o -D_GNU_SOURCE -fstack-protector-all -O2 -Wall $(C_FLAGS_$(ARCH)) -lxml2 -lmysqlclient -lbluetooth -lcurl -lm -o smatool 
 smatool.o: smatool.c sma_mysql.h
