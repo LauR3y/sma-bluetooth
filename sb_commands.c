@@ -15,6 +15,7 @@ extern unsigned char * ReadStream( ConfType *, FlagType *, ReadRecordType *, int
 extern char * return_xml_data( ConfType *,int );
 extern long ConvertStreamtoLong( unsigned char *, int, unsigned long * );
 extern float ConvertStreamtoFloat( unsigned char *, int, float * );
+extern int ConvertStreamtoInt( unsigned char * stream, int length, int * value );
 extern char * ConvertStreamtoString( unsigned char *, int );
 extern unsigned char conv( char * );
 
